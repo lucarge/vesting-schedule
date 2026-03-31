@@ -20,6 +20,7 @@ const defaultFormData: GrantFormData = {
   grantedAmount: "",
   vsopsValue: "",
   vsopsStrikePrice: "",
+  companyValuation: "",
 }
 
 interface GrantFormProps {
@@ -75,6 +76,11 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
       errs.vsopsStrikePrice = "Must be greater than 0"
     }
 
+    const valuation = parseFloat(form.companyValuation)
+    if (!form.companyValuation || isNaN(valuation) || valuation <= 0) {
+      errs.companyValuation = "Must be greater than 0"
+    }
+
     return Object.keys(errs).length > 0 ? errs : null
   }
 
@@ -99,6 +105,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
           ? parseFloat(form.vsopsValue) * parseInt(form.grantedAmount)
           : parseFloat(form.vsopsValue),
       vsopsStrikePrice: parseFloat(form.vsopsStrikePrice),
+      companyValuation: parseFloat(form.companyValuation),
     }
 
     onAddGrant(grant)
@@ -243,6 +250,18 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
               value={form.vsopsStrikePrice}
               onChange={(e) => updateField("vsopsStrikePrice", e.target.value)}
               aria-invalid={!!errors.vsopsStrikePrice}
+            />
+          </Field>
+
+          <Field label="Company valuation (EUR)" error={errors.companyValuation}>
+            <Input
+              type="number"
+              min={0}
+              step="0.01"
+              placeholder="e.g. 10000000"
+              value={form.companyValuation}
+              onChange={(e) => updateField("companyValuation", e.target.value)}
+              aria-invalid={!!errors.companyValuation}
             />
           </Field>
 
