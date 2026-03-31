@@ -30,6 +30,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
   const [form, setForm] = useState<GrantFormData>(defaultFormData)
   const [errors, setErrors] = useState<Partial<Record<keyof GrantFormData, string>>>({})
   const [datePickerOpen, setDatePickerOpen] = useState(false)
+  const [valueMode, setValueMode] = useState<"total" | "per-share">("total")
 
   function updateField<K extends keyof GrantFormData>(key: K, value: GrantFormData[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -93,13 +94,17 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
       vestingPeriodMonths: parseInt(form.vestingPeriodMonths),
       cliffMonths: parseInt(form.cliffMonths),
       grantedAmount: parseInt(form.grantedAmount),
-      vsopsValue: parseFloat(form.vsopsValue),
+      vsopsValue:
+        valueMode === "per-share"
+          ? parseFloat(form.vsopsValue) * parseInt(form.grantedAmount)
+          : parseFloat(form.vsopsValue),
       vsopsStrikePrice: parseFloat(form.vsopsStrikePrice),
     }
 
     onAddGrant(grant)
     setForm(defaultFormData)
     setErrors({})
+    setValueMode("total")
   }
 
   return (
@@ -130,6 +135,9 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
               <PopoverContent className="w-auto p-3">
                 <Calendar
                   mode="single"
+                  captionLayout="dropdown"
+                  startMonth={new Date(2010, 0)}
+                  endMonth={new Date(2040, 11)}
                   selected={form.grantDate}
                   onSelect={(date) => {
                     updateField("grantDate", date)
@@ -183,12 +191,43 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
             />
           </Field>
 
-          <Field label="Total value (EUR)" error={errors.vsopsValue}>
+          <Field
+            label="Value (EUR)"
+            error={errors.vsopsValue}
+            trailing={
+              <div className="flex rounded-md border border-border text-[0.65rem] leading-none dark:border-input">
+                <button
+                  type="button"
+                  className={cn(
+                    "rounded-l-[5px] px-1.5 py-1 transition-colors",
+                    valueMode === "total"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => setValueMode("total")}
+                >
+                  Total
+                </button>
+                <button
+                  type="button"
+                  className={cn(
+                    "rounded-r-[5px] px-1.5 py-1 transition-colors",
+                    valueMode === "per-share"
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
+                  )}
+                  onClick={() => setValueMode("per-share")}
+                >
+                  Per share
+                </button>
+              </div>
+            }
+          >
             <Input
               type="number"
               min={0}
               step="0.01"
-              placeholder="e.g. 50000"
+              placeholder={valueMode === "total" ? "e.g. 50000" : "e.g. 5.00"}
               value={form.vsopsValue}
               onChange={(e) => updateField("vsopsValue", e.target.value)}
               aria-invalid={!!errors.vsopsValue}
@@ -221,15 +260,20 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
 function Field({
   label,
   error,
+  trailing,
   children,
 }: {
   label: string
   error?: string
+  trailing?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
     <div className="flex flex-col gap-1.5">
-      <Label>{label}</Label>
+      <div className="flex h-5 items-center gap-1.5">
+        <Label>{label}</Label>
+        {trailing}
+      </div>
       {children}
       {error && <p className="text-xs text-destructive">{error}</p>}
     </div>
