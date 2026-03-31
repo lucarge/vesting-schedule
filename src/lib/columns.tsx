@@ -95,6 +95,8 @@ export const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
       grant.companyValuation
         ? `${((grant.vsopsValue / grant.companyValuation) * 100).toFixed(4)}%`
         : "—",
+    renderFooter: (totals) =>
+      totals.totalOwnership ? `${totals.totalOwnership.toFixed(4)}%` : "—",
   },
 }
 
