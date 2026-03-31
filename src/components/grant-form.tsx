@@ -7,7 +7,13 @@ import { Calendar } from "@/components/ui/calendar"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select } from "@/components/ui/select"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { cn } from "@/lib/utils"
 import type { Grant, GrantFormData, VestingSchedule } from "@/types/grant"
@@ -159,11 +165,18 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
           <Field label="Vesting schedule" error={errors.vestingSchedule}>
             <Select
               value={form.vestingSchedule}
-              onChange={(e) => updateField("vestingSchedule", e.target.value as VestingSchedule)}
+              onValueChange={(value) => {
+                if (value) updateField("vestingSchedule", value as VestingSchedule)
+              }}
             >
-              <option value="monthly">Monthly</option>
-              <option value="quarterly">Quarterly</option>
-              <option value="yearly">Yearly</option>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="monthly">Monthly</SelectItem>
+                <SelectItem value="quarterly">Quarterly</SelectItem>
+                <SelectItem value="yearly">Yearly</SelectItem>
+              </SelectContent>
             </Select>
           </Field>
 

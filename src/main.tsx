@@ -1,14 +1,27 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
 
 import "./index.css"
-import App from "./App.tsx"
-import { ThemeProvider } from "@/components/theme-provider.tsx"
+import { AppLayout } from "@/components/app-layout"
+import { ThemeProvider } from "@/components/theme-provider"
+import { DashboardPage } from "@/pages/dashboard"
+import { GrantsPage } from "@/pages/grants"
+import { SettingsPage } from "@/pages/settings"
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <BrowserRouter>
+        <Routes>
+          <Route element={<AppLayout />}>
+            <Route index element={<DashboardPage />} />
+            <Route path="grants" element={<GrantsPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+            <Route path="*" element={<Navigate to="/" replace />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </ThemeProvider>
   </StrictMode>
 )
