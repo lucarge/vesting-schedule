@@ -10,16 +10,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Card,
+  CardAction,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
+import { ColumnConfigPopover } from "@/components/column-config-popover"
 import type { Grant } from "@/types/grant"
 import type { GrantTotals } from "@/hooks/use-grants"
-import { formatCurrency, formatDate, formatNumber } from "@/lib/format"
-
-const SCHEDULE_LABELS: Record<Grant["vestingSchedule"], string> = {
-  monthly: "Monthly",
-  quarterly: "Quarterly",
-  yearly: "Yearly",
-}
+import { useColumnConfig } from "@/hooks/use-column-config"
 
 interface GrantTableProps {
   grants: Grant[]
@@ -28,52 +29,58 @@ interface GrantTableProps {
 }
 
 export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
+  const { columnConfig, visibleColumns, toggleColumn, moveColumn, resetToDefaults } =
+    useColumnConfig()
+
   return (
     <Card>
       <CardHeader>
         <CardTitle>Grants</CardTitle>
+        <CardAction>
+          <ColumnConfigPopover
+            columnConfig={columnConfig}
+            onToggle={toggleColumn}
+            onMove={moveColumn}
+            onReset={resetToDefaults}
+          />
+        </CardAction>
       </CardHeader>
       <CardContent>
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Grant Date</TableHead>
-              <TableHead>Schedule</TableHead>
-              <TableHead className="text-right">Vesting Period</TableHead>
-              <TableHead className="text-right">Cliff</TableHead>
-              <TableHead className="text-right">Shares</TableHead>
-              <TableHead className="text-right">Value</TableHead>
-              <TableHead className="text-right">Strike Price</TableHead>
-              <TableHead className="text-right">Valuation</TableHead>
-              <TableHead className="text-right">Ownership</TableHead>
+              {visibleColumns.map((col) => (
+                <TableHead
+                  key={col.id}
+                  className={col.align === "right" ? "text-right" : undefined}
+                >
+                  {col.label}
+                </TableHead>
+              ))}
               <TableHead className="w-10" />
             </TableRow>
           </TableHeader>
           <TableBody>
             {grants.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={10} className="text-center text-muted-foreground">
+                <TableCell
+                  colSpan={visibleColumns.length + 1}
+                  className="text-center text-muted-foreground"
+                >
                   No grants added yet.
                 </TableCell>
               </TableRow>
             ) : (
               grants.map((grant) => (
                 <TableRow key={grant.id}>
-                  <TableCell>{formatDate(grant.grantDate)}</TableCell>
-                  <TableCell>{SCHEDULE_LABELS[grant.vestingSchedule]}</TableCell>
-                  <TableCell className="text-right">{grant.vestingPeriodMonths} mo</TableCell>
-                  <TableCell className="text-right">{grant.cliffMonths} mo</TableCell>
-                  <TableCell className="text-right">{formatNumber(grant.grantedAmount)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(grant.vsopsValue)}</TableCell>
-                  <TableCell className="text-right">{formatCurrency(grant.vsopsStrikePrice)}</TableCell>
-                  <TableCell className="text-right">
-                    {grant.companyValuation ? formatCurrency(grant.companyValuation) : "—"}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    {grant.companyValuation
-                      ? `${((grant.vsopsValue / grant.companyValuation) * 100).toFixed(4)}%`
-                      : "—"}
-                  </TableCell>
+                  {visibleColumns.map((col) => (
+                    <TableCell
+                      key={col.id}
+                      className={col.align === "right" ? "text-right" : undefined}
+                    >
+                      {col.renderCell(grant)}
+                    </TableCell>
+                  ))}
                   <TableCell>
                     <Button
                       variant="ghost"
@@ -91,20 +98,22 @@ export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
           {grants.length > 0 && (
             <TableFooter>
               <TableRow>
-                <TableCell colSpan={4} className="font-medium">
-                  Total
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatNumber(totals.totalGrantedAmount)}
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatCurrency(totals.totalVsopsValue)}
-                </TableCell>
-                <TableCell className="text-right font-medium">
-                  {formatCurrency(totals.totalStrikeCost)}
-                </TableCell>
-                <TableCell />
-                <TableCell />
+                {visibleColumns.map((col, idx) => (
+                  <TableCell
+                    key={col.id}
+                    className={
+                      col.align === "right" || idx > 0
+                        ? "text-right font-medium"
+                        : "font-medium"
+                    }
+                  >
+                    {idx === 0
+                      ? "Total"
+                      : col.renderFooter
+                        ? col.renderFooter(totals)
+                        : null}
+                  </TableCell>
+                ))}
                 <TableCell />
               </TableRow>
             </TableFooter>
