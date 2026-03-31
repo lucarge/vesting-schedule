@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 
 import type { Grant } from "@/types/grant"
 
@@ -8,8 +8,26 @@ export interface GrantTotals {
   totalStrikeCost: number
 }
 
+const STORAGE_KEY = "vsop-grants"
+
+function loadGrants(): Grant[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return []
+    return JSON.parse(raw, (key, value) =>
+      key === "grantDate" ? new Date(value) : value,
+    )
+  } catch {
+    return []
+  }
+}
+
 export function useGrants() {
-  const [grants, setGrants] = useState<Grant[]>([])
+  const [grants, setGrants] = useState<Grant[]>(() => loadGrants())
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(grants))
+  }, [grants])
 
   const addGrant = (grant: Grant) => {
     setGrants((prev) => [...prev, grant])
