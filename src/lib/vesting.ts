@@ -143,7 +143,10 @@ export function computeYearlySummary(grants: Grant[]): YearlySummary[] {
     timeline: computeGrantTimeline(g),
   }))
 
-  const yearMap = new Map<number, { shares: number; value: number }>()
+  const yearMap = new Map<
+    number,
+    { shares: number; value: number; strikeCost: number }
+  >()
 
   for (const { grant, timeline } of timelines) {
     const valuePerShare =
@@ -151,9 +154,14 @@ export function computeYearlySummary(grants: Grant[]): YearlySummary[] {
 
     for (const ev of timeline.events) {
       const year = getYear(ev.date)
-      const existing = yearMap.get(year) ?? { shares: 0, value: 0 }
+      const existing = yearMap.get(year) ?? {
+        shares: 0,
+        value: 0,
+        strikeCost: 0,
+      }
       existing.shares += ev.sharesVested
       existing.value += ev.sharesVested * valuePerShare
+      existing.strikeCost += ev.sharesVested * grant.vsopsStrikePrice
       yearMap.set(year, existing)
     }
   }
@@ -164,5 +172,6 @@ export function computeYearlySummary(grants: Grant[]): YearlySummary[] {
       year,
       sharesVesting: data.shares,
       valueVesting: data.value,
+      netValueVesting: data.value - data.strikeCost,
     }))
 }

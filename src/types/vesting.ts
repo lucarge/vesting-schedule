@@ -14,6 +14,7 @@ export interface YearlySummary {
   year: number
   sharesVesting: number
   valueVesting: number
+  netValueVesting: number
 }
 
 export interface CumulativePoint {

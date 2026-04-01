@@ -21,6 +21,12 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { formatCurrency, formatNumber } from "@/lib/format"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import type { YearlySummary as YearlySummaryData } from "@/types/vesting"
 
 const chartConfig = {
@@ -81,6 +87,18 @@ export function YearlySummary({ data }: YearlySummaryProps) {
               <TableHead>Year</TableHead>
               <TableHead className="text-right">Shares</TableHead>
               <TableHead className="text-right">Value</TableHead>
+              <TableHead className="text-right">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help underline decoration-dotted underline-offset-4">
+                      Net Value
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Value minus strike price per share
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -92,6 +110,9 @@ export function YearlySummary({ data }: YearlySummaryProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   {formatCurrency(row.valueVesting)}
+                </TableCell>
+                <TableCell className="text-right">
+                  {formatCurrency(row.netValueVesting)}
                 </TableCell>
               </TableRow>
             ))}
