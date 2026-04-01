@@ -1,4 +1,5 @@
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
+import { Badge } from "@/components/ui/badge"
 import {
   Card,
   CardContent,
@@ -51,10 +52,25 @@ export function GrantBurndown({ grant, timeline }: GrantBurndownProps) {
       ? addMonths(grant.grantDate, grant.cliffMonths).getTime()
       : null
 
+  const now = Date.now()
+  const chartMin = chartData[0].date
+  const chartMax = chartData[chartData.length - 1].date
+  const showToday = now >= chartMin && now <= chartMax
+
+  const lastEvent = timeline.events[timeline.events.length - 1]
+  const isFullyVested = lastEvent && now >= lastEvent.date.getTime()
+
   return (
-    <Card>
+    <Card className={isFullyVested ? "border-emerald-500/40" : undefined}>
       <CardHeader>
-        <CardTitle>{formatDate(grant.grantDate)}</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>{formatDate(grant.grantDate)}</CardTitle>
+          {isFullyVested && (
+            <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/30">
+              Fully Vested
+            </Badge>
+          )}
+        </div>
         <CardDescription>
           {formatNumber(grant.grantedAmount)} shares &middot;{" "}
           {grant.vestingPeriodMonths}mo {grant.vestingSchedule} &middot;{" "}
@@ -94,7 +110,15 @@ export function GrantBurndown({ grant, timeline }: GrantBurndownProps) {
                 x={cliffDate}
                 stroke="var(--color-muted-foreground)"
                 strokeDasharray="4 4"
-                label={{ value: "Cliff", position: "top", fontSize: 11 }}
+                label={{ value: "Cliff", position: "insideTopRight", fontSize: 11, fill: "var(--color-muted-foreground)" }}
+              />
+            )}
+            {showToday && (
+              <ReferenceLine
+                x={now}
+                stroke="var(--color-foreground)"
+                strokeDasharray="4 4"
+                label={{ value: "Today", position: "insideTopRight", fontSize: 11, fill: "var(--color-foreground)" }}
               />
             )}
             <Area
