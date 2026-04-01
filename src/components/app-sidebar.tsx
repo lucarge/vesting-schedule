@@ -10,6 +10,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 const navItems = [
@@ -21,9 +22,12 @@ export function AppSidebar() {
   const location = useLocation()
 
   return (
-    <Sidebar collapsible="none">
-      <SidebarHeader className="px-4 py-3">
-        <span className="text-sm font-semibold">VSOP Tracker</span>
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="flex flex-row items-center justify-between px-4 py-3 group-data-[collapsible=icon]:px-2">
+        <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
+          Vesting Schedule
+        </span>
+        <SidebarTrigger />
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
