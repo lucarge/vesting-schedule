@@ -6,14 +6,31 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function AppLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
       <SidebarInset className="relative">
-        <SidebarTrigger className="absolute top-4 left-4 z-10" />
-        <div className="mx-auto w-full max-w-5xl p-6">
+        <div className="p-4 lg:absolute lg:top-4 lg:left-4 lg:z-10 lg:p-0">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger
+                render={<SidebarTrigger />}
+              />
+              <TooltipContent side="right">
+                Toggle Sidebar <kbd data-slot="kbd">⌘B</kbd>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+        <div className="mx-auto w-full max-w-5xl px-6 pb-6 lg:p-6">
           <Outlet />
         </div>
       </SidebarInset>
