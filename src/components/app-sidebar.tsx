@@ -1,5 +1,10 @@
 import { NavLink, useLocation } from "react-router-dom"
-import { FileTextIcon, LayoutDashboardIcon, SettingsIcon } from "lucide-react"
+import {
+  ChartColumnBigIcon,
+  FileTextIcon,
+  LayoutDashboardIcon,
+  SettingsIcon,
+} from "lucide-react"
 
 import {
   Sidebar,
@@ -10,7 +15,6 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarTrigger,
 } from "@/components/ui/sidebar"
 
 const navItems = [
@@ -23,11 +27,17 @@ export function AppSidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="flex flex-row items-center justify-between px-4 py-3 group-data-[collapsible=icon]:px-2">
-        <span className="text-sm font-semibold group-data-[collapsible=icon]:hidden">
-          Vesting Schedule
-        </span>
-        <SidebarTrigger />
+      <SidebarHeader>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <SidebarMenuButton size="lg">
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground [&_svg]:size-4">
+                <ChartColumnBigIcon />
+              </div>
+              <span className="font-semibold">Vesting Schedule</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+        </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
