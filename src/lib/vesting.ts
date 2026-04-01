@@ -28,7 +28,7 @@ function cumulativeSharesAtPeriod(
   i: number,
   totalPeriods: number,
 ): number {
-  return Math.floor((grantedAmount * i) / totalPeriods)
+  return (grantedAmount * i) / totalPeriods
 }
 
 export function computeGrantTimeline(grant: Grant): GrantVestingTimeline {

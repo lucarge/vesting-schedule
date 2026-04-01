@@ -19,9 +19,9 @@ import type { Grant } from "@/types/grant"
 import type { GrantVestingTimeline } from "@/types/vesting"
 
 const chartConfig = {
-  unvested: {
-    label: "Unvested",
-    color: "var(--color-chart-3)",
+  vested: {
+    label: "Vested",
+    color: "var(--color-chart-5)",
   },
 } satisfies ChartConfig
 
@@ -32,18 +32,18 @@ function formatMonthYear(date: Date): string {
   }).format(date)
 }
 
-interface GrantBurndownProps {
+interface GrantVestingChartProps {
   grant: Grant
   timeline: GrantVestingTimeline
 }
 
-export function GrantBurndown({ grant, timeline }: GrantBurndownProps) {
-  // Build chart data: start at full amount, step down at each event
+export function GrantVestingChart({ grant, timeline }: GrantVestingChartProps) {
+  // Build chart data: start at 0, step up at each vesting event
   const chartData = [
-    { date: grant.grantDate.getTime(), unvested: grant.grantedAmount },
+    { date: grant.grantDate.getTime(), vested: 0 },
     ...timeline.events.map((ev) => ({
       date: ev.date.getTime(),
-      unvested: ev.unvested,
+      vested: ev.cumulativeVested,
     })),
   ]
 
@@ -122,10 +122,10 @@ export function GrantBurndown({ grant, timeline }: GrantBurndownProps) {
               />
             )}
             <Area
-              dataKey="unvested"
+              dataKey="vested"
               type="stepAfter"
-              fill="var(--color-unvested)"
-              stroke="var(--color-unvested)"
+              fill="var(--color-vested)"
+              stroke="var(--color-vested)"
               fillOpacity={0.4}
             />
           </AreaChart>

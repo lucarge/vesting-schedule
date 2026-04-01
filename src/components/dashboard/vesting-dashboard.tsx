@@ -5,7 +5,7 @@ import type { Grant } from "@/types/grant"
 import { ChartColumnBig, Plus } from "lucide-react"
 import { Link } from "react-router"
 import { CumulativeChart } from "./cumulative-chart"
-import { GrantBurndown } from "./grant-burndown"
+import { GrantVestingChart } from "./grant-vesting-chart"
 import { YearlySummary } from "./yearly-summary"
 
 interface VestingDashboardProps {
@@ -48,7 +48,7 @@ export function VestingDashboard({ grants }: VestingDashboardProps) {
         <h3 className="mb-3 text-sm font-medium">Per-Grant Burndown</h3>
         <div className="grid gap-6 md:grid-cols-2">
           {grants.map((grant, i) => (
-            <GrantBurndown
+            <GrantVestingChart
               key={grant.id}
               grant={grant}
               timeline={grantTimelines[i]}
