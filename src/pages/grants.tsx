@@ -1,12 +1,16 @@
+import { useState } from "react"
 import { Link } from "react-router-dom"
 import { PlusIcon } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { GrantTable } from "@/components/grant-table"
+import { EditGrantDialog } from "@/components/edit-grant-dialog"
 import { useGrants } from "@/hooks/use-grants"
+import type { Grant } from "@/types/grant"
 
 export function GrantsPage() {
-  const { grants, removeGrant, totals } = useGrants()
+  const { grants, updateGrant, removeGrant, totals } = useGrants()
+  const [editingGrant, setEditingGrant] = useState<Grant | null>(null)
 
   return (
     <div className="flex flex-col gap-6">
@@ -22,7 +26,20 @@ export function GrantsPage() {
           Add Grant
         </Button>
       </div>
-      <GrantTable grants={grants} totals={totals} onRemoveGrant={removeGrant} />
+      <GrantTable
+        grants={grants}
+        totals={totals}
+        onEditGrant={setEditingGrant}
+        onRemoveGrant={removeGrant}
+      />
+      <EditGrantDialog
+        grant={editingGrant}
+        open={editingGrant !== null}
+        onOpenChange={(open) => {
+          if (!open) setEditingGrant(null)
+        }}
+        onUpdateGrant={updateGrant}
+      />
     </div>
   )
 }

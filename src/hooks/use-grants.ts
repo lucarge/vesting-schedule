@@ -34,6 +34,10 @@ export function useGrants() {
     setGrants((prev) => [...prev, grant])
   }
 
+  const updateGrant = (grant: Grant) => {
+    setGrants((prev) => prev.map((g) => (g.id === grant.id ? grant : g)))
+  }
+
   const removeGrant = (id: string) => {
     setGrants((prev) => prev.filter((g) => g.id !== id))
   }
@@ -57,5 +61,5 @@ export function useGrants() {
     [grants],
   )
 
-  return { grants, addGrant, removeGrant, totals }
+  return { grants, addGrant, updateGrant, removeGrant, totals }
 }

@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ArrowUpDown, Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Pencil, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils"
 interface GrantTableProps {
   grants: Grant[]
   totals: GrantTotals
+  onEditGrant: (grant: Grant) => void
   onRemoveGrant: (id: string) => void
 }
 
@@ -40,7 +41,7 @@ const FOOTER_COLOR_CLASSES = {
   red: "text-red-600 dark:text-red-400",
 } as const
 
-export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
+export function GrantTable({ grants, totals, onEditGrant, onRemoveGrant }: GrantTableProps) {
   const {
     columnConfig,
     visibleColumns,
@@ -134,14 +135,24 @@ export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
                       </TableCell>
                     ))}
                     <TableCell>
-                      <Button
-                        variant="ghost"
-                        size="icon-xs"
-                        onClick={() => onRemoveGrant(grant.id)}
-                        aria-label="Remove grant"
-                      >
-                        <Trash2 />
-                      </Button>
+                      <div className="flex items-center gap-0.5">
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => onEditGrant(grant)}
+                          aria-label="Edit grant"
+                        >
+                          <Pencil />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-xs"
+                          onClick={() => onRemoveGrant(grant.id)}
+                          aria-label="Remove grant"
+                        >
+                          <Trash2 />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

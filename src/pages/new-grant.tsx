@@ -1,5 +1,6 @@
 import { useNavigate } from "react-router-dom"
 
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { GrantForm } from "@/components/grant-form"
 import { useGrants } from "@/hooks/use-grants"
 import type { Grant } from "@/types/grant"
@@ -21,7 +22,14 @@ export function NewGrantPage() {
           Add a new virtual stock option grant.
         </p>
       </div>
-      <GrantForm onAddGrant={handleAddGrant} />
+      <Card>
+        <CardHeader>
+          <CardTitle>Grant Details</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <GrantForm onAddGrant={handleAddGrant} />
+        </CardContent>
+      </Card>
     </div>
   )
 }

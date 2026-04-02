@@ -14,7 +14,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import {
   Tooltip,
   TooltipContent,
@@ -36,12 +35,32 @@ const defaultFormData: GrantFormData = {
   ownershipPercentage: "",
 }
 
-interface GrantFormProps {
-  onAddGrant: (grant: Grant) => void
+function grantToFormData(grant: Grant): GrantFormData {
+  return {
+    grantDate: grant.grantDate,
+    vestingSchedule: grant.vestingSchedule,
+    vestingPeriodMonths: String(grant.vestingPeriodMonths),
+    cliffMonths: String(grant.cliffMonths),
+    grantedAmount: String(grant.grantedAmount),
+    vsopsValue: String(grant.vsopsValue),
+    vsopsStrikePrice: String(grant.vsopsStrikePrice),
+    companyValuation: grant.companyValuation ? String(grant.companyValuation) : "",
+    ownershipPercentage: "",
+  }
 }
 
-export function GrantForm({ onAddGrant }: GrantFormProps) {
-  const [form, setForm] = useState<GrantFormData>(defaultFormData)
+interface GrantFormProps {
+  onAddGrant?: (grant: Grant) => void
+  initialGrant?: Grant
+  onUpdateGrant?: (grant: Grant) => void
+  className?: string
+}
+
+export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }: GrantFormProps) {
+  const isEditing = !!initialGrant
+  const [form, setForm] = useState<GrantFormData>(
+    initialGrant ? grantToFormData(initialGrant) : defaultFormData,
+  )
   const [errors, setErrors] = useState<Partial<Record<keyof GrantFormData, string>>>({})
   const [datePickerOpen, setDatePickerOpen] = useState(false)
   const [valueMode, setValueMode] = useState<"total" | "per-share">("total")
@@ -55,6 +74,17 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
         return next
       })
     }
+  }
+
+  function switchValueMode(mode: "total" | "per-share") {
+    if (mode === valueMode) return
+    const value = parseFloat(form.vsopsValue)
+    const shares = parseInt(form.grantedAmount)
+    if (!isNaN(value) && value > 0 && !isNaN(shares) && shares > 0) {
+      const converted = mode === "per-share" ? value / shares : value * shares
+      updateField("vsopsValue", String(converted))
+    }
+    setValueMode(mode)
   }
 
   function validate(): Partial<Record<keyof GrantFormData, string>> | null {
@@ -135,7 +165,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
     }
 
     const grant: Grant = {
-      id: crypto.randomUUID(),
+      id: isEditing ? initialGrant.id : crypto.randomUUID(),
       grantDate: form.grantDate!,
       vestingSchedule: form.vestingSchedule,
       vestingPeriodMonths: parseInt(form.vestingPeriodMonths),
@@ -146,23 +176,22 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
       companyValuation,
     }
 
-    onAddGrant(grant)
-    setForm(defaultFormData)
-    setErrors({})
-    setValueMode("total")
+    if (isEditing) {
+      onUpdateGrant?.(grant)
+    } else {
+      onAddGrant?.(grant)
+      setForm(defaultFormData)
+      setErrors({})
+      setValueMode("total")
+    }
   }
 
   const hasValuation = !!form.companyValuation
   const hasOwnership = !!form.ownershipPercentage
 
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Add Grant</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <TooltipProvider>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+  const formContent = (
+    <TooltipProvider>
+      <form onSubmit={handleSubmit} className={cn("grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4", className)}>
             <Field label="Grant date" tooltip="The date the stock option grant was issued" error={errors.grantDate}>
               <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
                 <PopoverTrigger
@@ -205,7 +234,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
                   if (value) updateField("vestingSchedule", value as VestingSchedule)
                 }}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -261,7 +290,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground",
                     )}
-                    onClick={() => setValueMode("total")}
+                    onClick={() => switchValueMode("total")}
                   >
                     Total
                   </button>
@@ -273,7 +302,7 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
                         ? "bg-primary text-primary-foreground"
                         : "text-muted-foreground hover:text-foreground",
                     )}
-                    onClick={() => setValueMode("per-share")}
+                    onClick={() => switchValueMode("per-share")}
                   >
                     Per share
                   </button>
@@ -340,14 +369,14 @@ export function GrantForm({ onAddGrant }: GrantFormProps) {
 
             <div className="flex items-end">
               <Button type="submit" className="w-full">
-                Add Grant
+                {isEditing ? "Save Changes" : "Add Grant"}
               </Button>
             </div>
           </form>
         </TooltipProvider>
-      </CardContent>
-    </Card>
   )
+
+  return formContent
 }
 
 function Field({
