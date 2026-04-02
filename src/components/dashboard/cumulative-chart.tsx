@@ -1,4 +1,4 @@
-import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
 import {
   Card,
   CardContent,
@@ -45,6 +45,11 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
     totalVested: p.totalVested,
     totalUnvested: p.totalUnvested,
   }))
+
+  const now = Date.now()
+  const chartMin = chartData[0].date
+  const chartMax = chartData[chartData.length - 1].date
+  const showToday = now >= chartMin && now <= chartMax
 
   return (
     <Card>
@@ -99,6 +104,14 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
               stroke="var(--color-totalUnvested)"
               fillOpacity={0.3}
             />
+            {showToday && (
+              <ReferenceLine
+                x={now}
+                stroke="var(--color-foreground)"
+                strokeDasharray="4 4"
+                label={{ value: "Today", position: "insideTopRight", fontSize: 11, fill: "var(--color-foreground)" }}
+              />
+            )}
           </AreaChart>
         </ChartContainer>
       </CardContent>
