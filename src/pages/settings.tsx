@@ -1,5 +1,5 @@
 import { useRef, useState } from "react"
-import { Download, Upload } from "lucide-react"
+import { Download, Trash2, Upload } from "lucide-react"
 import { format } from "date-fns"
 
 import { useTheme } from "@/components/theme-provider"
@@ -57,6 +57,7 @@ export function SettingsPage() {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [importError, setImportError] = useState<string | null>(null)
   const [pendingBackup, setPendingBackup] = useState<BackupData | null>(null)
+  const [pendingClear, setPendingClear] = useState(false)
 
   function handleFileSelect(e: React.ChangeEvent<HTMLInputElement>) {
     setImportError(null)
@@ -173,6 +174,50 @@ export function SettingsPage() {
                 size="sm"
                 variant="outline"
                 onClick={() => setPendingBackup(null)}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
+      <div className="max-w-sm space-y-2">
+        <Label>Danger zone</Label>
+        <p className="text-xs text-muted-foreground">
+          Permanently delete all grants and preferences.
+        </p>
+        <Button
+          variant="destructive"
+          size="sm"
+          onClick={() => setPendingClear(true)}
+        >
+          <Trash2 className="mr-1.5 size-4" />
+          Clear all data
+        </Button>
+        {pendingClear && (
+          <div className="rounded-md border border-destructive bg-muted/50 p-3 space-y-2">
+            <p className="text-xs">
+              This will permanently delete all your grants, column preferences,
+              and theme settings. This cannot be undone.
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  localStorage.removeItem("vsop-grants")
+                  localStorage.removeItem("vsop-column-config")
+                  localStorage.removeItem("vsop-sort-config")
+                  localStorage.removeItem("theme")
+                  window.location.reload()
+                }}
+              >
+                Clear all data
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => setPendingClear(false)}
               >
                 Cancel
               </Button>
