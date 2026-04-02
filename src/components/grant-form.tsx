@@ -82,7 +82,7 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
     const shares = parseFloat(form.grantedAmount)
     if (!isNaN(value) && value > 0 && !isNaN(shares) && shares > 0) {
       const converted = mode === "per-share" ? value / shares : value * shares
-      updateField("vsopsValue", String(converted))
+      updateField("vsopsValue", String(Math.round(converted * 100) / 100))
     }
     setValueMode(mode)
   }
