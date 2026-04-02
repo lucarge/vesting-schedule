@@ -9,7 +9,7 @@ export interface Grant {
   grantedAmount: number
   vsopsValue: number
   vsopsStrikePrice: number
-  companyValuation: number
+  companyValuation?: number
 }
 
 export interface GrantFormData {
@@ -21,4 +21,5 @@ export interface GrantFormData {
   vsopsValue: string
   vsopsStrikePrice: string
   companyValuation: string
+  ownershipPercentage: string
 }
