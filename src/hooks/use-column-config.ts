@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 
 import {
   COLUMN_DEFS,
@@ -7,10 +7,17 @@ import {
   type ColumnDef,
   type ColumnId,
 } from "@/lib/columns"
+import type { Grant } from "@/types/grant"
 
 const STORAGE_KEY = "vsop-column-config"
+const SORT_STORAGE_KEY = "vsop-sort-config"
 
 const ALL_COLUMN_IDS = new Set(Object.keys(COLUMN_DEFS) as ColumnId[])
+
+export interface SortConfig {
+  column: ColumnId | null
+  direction: "asc" | "desc"
+}
 
 function loadConfig(): ColumnConfig[] {
   try {
@@ -33,12 +40,31 @@ function loadConfig(): ColumnConfig[] {
   }
 }
 
+function loadSortConfig(): SortConfig {
+  try {
+    const raw = localStorage.getItem(SORT_STORAGE_KEY)
+    if (!raw) return { column: null, direction: "asc" }
+    const stored: SortConfig = JSON.parse(raw)
+    if (stored.column && !ALL_COLUMN_IDS.has(stored.column)) {
+      return { column: null, direction: "asc" }
+    }
+    return stored
+  } catch {
+    return { column: null, direction: "asc" }
+  }
+}
+
 export function useColumnConfig() {
   const [columnConfig, setColumnConfig] = useState<ColumnConfig[]>(loadConfig)
+  const [sortConfig, setSortConfig] = useState<SortConfig>(loadSortConfig)
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(columnConfig))
   }, [columnConfig])
+
+  useEffect(() => {
+    localStorage.setItem(SORT_STORAGE_KEY, JSON.stringify(sortConfig))
+  }, [sortConfig])
 
   const visibleColumns: ColumnDef[] = useMemo(
     () =>
@@ -73,5 +99,40 @@ export function useColumnConfig() {
     setColumnConfig(DEFAULT_COLUMN_CONFIG)
   }
 
-  return { columnConfig, visibleColumns, toggleColumn, moveColumn, resetToDefaults }
+  const toggleSort = useCallback((id: ColumnId) => {
+    setSortConfig((prev) => {
+      if (prev.column !== id) return { column: id, direction: "asc" }
+      if (prev.direction === "asc") return { column: id, direction: "desc" }
+      return { column: null, direction: "asc" }
+    })
+  }, [])
+
+  const sortGrants = useCallback(
+    (grants: Grant[]): Grant[] => {
+      if (!sortConfig.column) return grants
+      const colDef = COLUMN_DEFS[sortConfig.column]
+      if (!colDef.sortValue) return grants
+      const { sortValue } = colDef
+      const dir = sortConfig.direction === "asc" ? 1 : -1
+      return [...grants].sort((a, b) => {
+        const va = sortValue(a)
+        const vb = sortValue(b)
+        if (va < vb) return -1 * dir
+        if (va > vb) return 1 * dir
+        return 0
+      })
+    },
+    [sortConfig],
+  )
+
+  return {
+    columnConfig,
+    visibleColumns,
+    toggleColumn,
+    moveColumn,
+    resetToDefaults,
+    sortConfig,
+    toggleSort,
+    sortGrants,
+  }
 }

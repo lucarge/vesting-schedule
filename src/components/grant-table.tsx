@@ -1,4 +1,4 @@
-import { Trash2 } from "lucide-react"
+import { ArrowDown, ArrowUp, ArrowUpDown, Trash2 } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import {
@@ -17,10 +17,17 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { ColumnConfigPopover } from "@/components/column-config-popover"
 import type { Grant } from "@/types/grant"
 import type { GrantTotals } from "@/hooks/use-grants"
 import { useColumnConfig } from "@/hooks/use-column-config"
+import { cn } from "@/lib/utils"
 
 interface GrantTableProps {
   grants: Grant[]
@@ -28,9 +35,24 @@ interface GrantTableProps {
   onRemoveGrant: (id: string) => void
 }
 
+const FOOTER_COLOR_CLASSES = {
+  green: "text-emerald-600 dark:text-emerald-400",
+  red: "text-red-600 dark:text-red-400",
+} as const
+
 export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
-  const { columnConfig, visibleColumns, toggleColumn, moveColumn, resetToDefaults } =
-    useColumnConfig()
+  const {
+    columnConfig,
+    visibleColumns,
+    toggleColumn,
+    moveColumn,
+    resetToDefaults,
+    sortConfig,
+    toggleSort,
+    sortGrants,
+  } = useColumnConfig()
+
+  const sortedGrants = sortGrants(grants)
 
   return (
     <Card>
@@ -46,79 +68,113 @@ export function GrantTable({ grants, totals, onRemoveGrant }: GrantTableProps) {
         </CardAction>
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {visibleColumns.map((col) => (
-                <TableHead
-                  key={col.id}
-                  className={col.align === "right" ? "text-right" : undefined}
-                >
-                  {col.label}
-                </TableHead>
-              ))}
-              <TableHead className="w-10" />
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {grants.length === 0 ? (
+        <TooltipProvider>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell
-                  colSpan={visibleColumns.length + 1}
-                  className="text-center text-muted-foreground"
-                >
-                  No grants added yet.
-                </TableCell>
-              </TableRow>
-            ) : (
-              grants.map((grant) => (
-                <TableRow key={grant.id}>
-                  {visibleColumns.map((col) => (
-                    <TableCell
-                      key={col.id}
-                      className={col.align === "right" ? "text-right" : undefined}
-                    >
-                      {col.renderCell(grant)}
-                    </TableCell>
-                  ))}
-                  <TableCell>
-                    <Button
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={() => onRemoveGrant(grant.id)}
-                      aria-label="Remove grant"
-                    >
-                      <Trash2 />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-          {grants.length > 0 && (
-            <TableFooter>
-              <TableRow>
-                {visibleColumns.map((col, idx) => (
-                  <TableCell
+                {visibleColumns.map((col) => (
+                  <TableHead
                     key={col.id}
-                    className={
-                      col.align === "right" || idx > 0
-                        ? "text-right font-medium"
-                        : "font-medium"
+                    className={cn(
+                      col.align === "right" && "text-right",
+                      col.sortValue && "cursor-pointer select-none",
+                    )}
+                    onClick={
+                      col.sortValue ? () => toggleSort(col.id) : undefined
                     }
                   >
-                    {idx === 0
-                      ? "Total"
-                      : col.renderFooter
-                        ? col.renderFooter(totals)
-                        : null}
-                  </TableCell>
+                    <span className="inline-flex items-center gap-1">
+                      {col.tooltip ? (
+                        <Tooltip>
+                          <TooltipTrigger className="underline decoration-dotted decoration-muted-foreground/50 underline-offset-4">
+                            {col.label}
+                          </TooltipTrigger>
+                          <TooltipContent>{col.tooltip}</TooltipContent>
+                        </Tooltip>
+                      ) : (
+                        col.label
+                      )}
+                      {col.sortValue &&
+                        (sortConfig.column === col.id ? (
+                          sortConfig.direction === "asc" ? (
+                            <ArrowUp className="size-3.5 text-foreground" />
+                          ) : (
+                            <ArrowDown className="size-3.5 text-foreground" />
+                          )
+                        ) : (
+                          <ArrowUpDown className="size-3.5 text-muted-foreground/50" />
+                        ))}
+                    </span>
+                  </TableHead>
                 ))}
-                <TableCell />
+                <TableHead className="w-10" />
               </TableRow>
-            </TableFooter>
-          )}
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {grants.length === 0 ? (
+                <TableRow>
+                  <TableCell
+                    colSpan={visibleColumns.length + 1}
+                    className="text-center text-muted-foreground"
+                  >
+                    No grants added yet.
+                  </TableCell>
+                </TableRow>
+              ) : (
+                sortedGrants.map((grant) => (
+                  <TableRow key={grant.id}>
+                    {visibleColumns.map((col) => (
+                      <TableCell
+                        key={col.id}
+                        className={
+                          col.align === "right" ? "text-right" : undefined
+                        }
+                      >
+                        {col.renderCell(grant)}
+                      </TableCell>
+                    ))}
+                    <TableCell>
+                      <Button
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={() => onRemoveGrant(grant.id)}
+                        aria-label="Remove grant"
+                      >
+                        <Trash2 />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+            {grants.length > 0 && (
+              <TableFooter>
+                <TableRow>
+                  {visibleColumns.map((col, idx) => (
+                    <TableCell
+                      key={col.id}
+                      className={cn(
+                        "font-medium",
+                        (col.align === "right" || idx > 0) && "text-right",
+                        idx > 0 &&
+                          col.renderFooter &&
+                          col.footerColor &&
+                          FOOTER_COLOR_CLASSES[col.footerColor],
+                      )}
+                    >
+                      {idx === 0
+                        ? "Total"
+                        : col.renderFooter
+                          ? col.renderFooter(totals)
+                          : null}
+                    </TableCell>
+                  ))}
+                  <TableCell />
+                </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+        </TooltipProvider>
       </CardContent>
     </Card>
   )
