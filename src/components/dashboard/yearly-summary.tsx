@@ -85,8 +85,18 @@ export function YearlySummary({ data }: YearlySummaryProps) {
           <TableHeader>
             <TableRow>
               <TableHead>Year</TableHead>
-              <TableHead className="text-right">Shares</TableHead>
-              <TableHead className="text-right">Value</TableHead>
+              <TableHead className="text-right">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help underline decoration-dotted underline-offset-4">
+                      Shares
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Number of shares vesting in this year
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
               <TableHead className="text-right">
                 <TooltipProvider>
                   <Tooltip>
@@ -94,7 +104,19 @@ export function YearlySummary({ data }: YearlySummaryProps) {
                       Net Value
                     </TooltipTrigger>
                     <TooltipContent>
-                      Value minus strike price per share
+                      Value minus total strike cost
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              </TableHead>
+              <TableHead className="text-right">
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger className="cursor-help underline decoration-dotted underline-offset-4">
+                      Value
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      Total value of shares based on current valuation
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -109,10 +131,10 @@ export function YearlySummary({ data }: YearlySummaryProps) {
                   {formatNumber(row.sharesVesting)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(row.valueVesting)}
+                  {formatCurrency(row.netValueVesting)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCurrency(row.netValueVesting)}
+                  {formatCurrency(row.valueVesting)}
                 </TableCell>
               </TableRow>
             ))}

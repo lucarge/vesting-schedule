@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
 import {
   Card,
@@ -46,10 +47,12 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
     totalUnvested: p.totalUnvested,
   }))
 
-  const now = Date.now()
+  const [now] = useState(Date.now)
   const chartMin = chartData[0].date
   const chartMax = chartData[chartData.length - 1].date
   const showToday = now >= chartMin && now <= chartMax
+  const todayPct =
+    showToday ? `${((now - chartMin) / (chartMax - chartMin)) * 100}%` : null
 
   return (
     <Card>
@@ -62,6 +65,26 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-[2/1] w-full">
           <AreaChart data={chartData} stackOffset="none">
+            {todayPct && (
+              <defs>
+                <linearGradient id="vestedFade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-totalVested)" stopOpacity={0.6} />
+                  <stop offset={todayPct} stopColor="var(--color-totalVested)" stopOpacity={0.15} />
+                </linearGradient>
+                <linearGradient id="unvestedFade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={0.3} />
+                  <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={0.08} />
+                </linearGradient>
+                <linearGradient id="vestedStrokeFade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-totalVested)" stopOpacity={1} />
+                  <stop offset={todayPct} stopColor="var(--color-totalVested)" stopOpacity={0.3} />
+                </linearGradient>
+                <linearGradient id="unvestedStrokeFade" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={1} />
+                  <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={0.3} />
+                </linearGradient>
+              </defs>
+            )}
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -92,17 +115,17 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
               dataKey="totalVested"
               type="stepAfter"
               stackId="a"
-              fill="var(--color-totalVested)"
-              stroke="var(--color-totalVested)"
-              fillOpacity={0.6}
+              fill={todayPct ? "url(#vestedFade)" : "var(--color-totalVested)"}
+              stroke={todayPct ? "url(#vestedStrokeFade)" : "var(--color-totalVested)"}
+              fillOpacity={todayPct ? 1 : 0.6}
             />
             <Area
               dataKey="totalUnvested"
               type="stepAfter"
               stackId="a"
-              fill="var(--color-totalUnvested)"
-              stroke="var(--color-totalUnvested)"
-              fillOpacity={0.3}
+              fill={todayPct ? "url(#unvestedFade)" : "var(--color-totalUnvested)"}
+              stroke={todayPct ? "url(#unvestedStrokeFade)" : "var(--color-totalUnvested)"}
+              fillOpacity={todayPct ? 1 : 0.3}
             />
             {showToday && (
               <ReferenceLine

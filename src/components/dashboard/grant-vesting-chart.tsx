@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
 import { Badge } from "@/components/ui/badge"
 import {
@@ -52,10 +53,14 @@ export function GrantVestingChart({ grant, timeline }: GrantVestingChartProps) {
       ? addMonths(grant.grantDate, grant.cliffMonths).getTime()
       : null
 
-  const now = Date.now()
+  const [now] = useState(Date.now)
   const chartMin = chartData[0].date
   const chartMax = chartData[chartData.length - 1].date
   const showToday = now >= chartMin && now <= chartMax
+  const todayPct =
+    showToday ? `${((now - chartMin) / (chartMax - chartMin)) * 100}%` : null
+  const gradientId = `grantFade-${grant.id}`
+  const strokeGradientId = `grantStrokeFade-${grant.id}`
 
   const lastEvent = timeline.events[timeline.events.length - 1]
   const isFullyVested = lastEvent && now >= lastEvent.date.getTime()
@@ -80,6 +85,18 @@ export function GrantVestingChart({ grant, timeline }: GrantVestingChartProps) {
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-[2/1] w-full">
           <AreaChart data={chartData}>
+            {todayPct && (
+              <defs>
+                <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-vested)" stopOpacity={0.4} />
+                  <stop offset={todayPct} stopColor="var(--color-vested)" stopOpacity={0.1} />
+                </linearGradient>
+                <linearGradient id={strokeGradientId} x1="0" y1="0" x2="1" y2="0">
+                  <stop offset={todayPct} stopColor="var(--color-vested)" stopOpacity={1} />
+                  <stop offset={todayPct} stopColor="var(--color-vested)" stopOpacity={0.3} />
+                </linearGradient>
+              </defs>
+            )}
             <CartesianGrid vertical={false} />
             <XAxis
               dataKey="date"
@@ -124,9 +141,9 @@ export function GrantVestingChart({ grant, timeline }: GrantVestingChartProps) {
             <Area
               dataKey="vested"
               type="stepAfter"
-              fill="var(--color-vested)"
-              stroke="var(--color-vested)"
-              fillOpacity={0.4}
+              fill={todayPct ? `url(#${gradientId})` : "var(--color-vested)"}
+              stroke={todayPct ? `url(#${strokeGradientId})` : "var(--color-vested)"}
+              fillOpacity={todayPct ? 1 : 0.4}
             />
           </AreaChart>
         </ChartContainer>

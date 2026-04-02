@@ -6,6 +6,7 @@ import { ChartColumnBig, Plus } from "lucide-react"
 import { Link } from "react-router"
 import { CumulativeChart } from "./cumulative-chart"
 import { GrantVestingChart } from "./grant-vesting-chart"
+import { VestingSummary } from "./vesting-summary"
 import { YearlySummary } from "./yearly-summary"
 
 interface VestingDashboardProps {
@@ -42,8 +43,9 @@ export function VestingDashboard({ grants }: VestingDashboardProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <YearlySummary data={yearlySummary} />
+      <VestingSummary grants={grants} />
       <CumulativeChart data={cumulativeTimeline} />
+      <YearlySummary data={yearlySummary} />
       <div>
         <h3 className="mb-3 text-sm font-medium">Per-Grant Burndown</h3>
         <div className="grid gap-6 md:grid-cols-2">
