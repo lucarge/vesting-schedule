@@ -79,7 +79,7 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
   function switchValueMode(mode: "total" | "per-share") {
     if (mode === valueMode) return
     const value = parseFloat(form.vsopsValue)
-    const shares = parseInt(form.grantedAmount)
+    const shares = parseFloat(form.grantedAmount)
     if (!isNaN(value) && value > 0 && !isNaN(shares) && shares > 0) {
       const converted = mode === "per-share" ? value / shares : value * shares
       updateField("vsopsValue", String(converted))
@@ -104,9 +104,9 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
       errs.cliffMonths = "Must be less than vesting period"
     }
 
-    const amount = parseInt(form.grantedAmount)
-    if (!form.grantedAmount || isNaN(amount) || amount < 1) {
-      errs.grantedAmount = "Must be at least 1"
+    const amount = parseFloat(form.grantedAmount)
+    if (!form.grantedAmount || isNaN(amount) || amount <= 0) {
+      errs.grantedAmount = "Must be greater than 0"
     }
 
     const value = parseFloat(form.vsopsValue)
@@ -152,7 +152,7 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
 
     const totalValue =
       valueMode === "per-share"
-        ? parseFloat(form.vsopsValue) * parseInt(form.grantedAmount)
+        ? parseFloat(form.vsopsValue) * parseFloat(form.grantedAmount)
         : parseFloat(form.vsopsValue)
 
     let companyValuation: number | undefined
@@ -170,7 +170,7 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
       vestingSchedule: form.vestingSchedule,
       vestingPeriodMonths: parseInt(form.vestingPeriodMonths),
       cliffMonths: parseInt(form.cliffMonths),
-      grantedAmount: parseInt(form.grantedAmount),
+      grantedAmount: parseFloat(form.grantedAmount),
       vsopsValue: totalValue,
       vsopsStrikePrice: parseFloat(form.vsopsStrikePrice),
       companyValuation,
@@ -268,7 +268,8 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
             <Field label="Number of shares" tooltip="Total number of shares in this grant" error={errors.grantedAmount}>
               <Input
                 type="number"
-                min={1}
+                min={0}
+                step="any"
                 placeholder="e.g. 10000"
                 value={form.grantedAmount}
                 onChange={(e) => updateField("grantedAmount", e.target.value)}
