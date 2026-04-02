@@ -15,8 +15,12 @@ import {
   ChartLegendContent,
   type ChartConfig,
 } from "@/components/ui/chart"
-import { formatNumber } from "@/lib/format"
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { formatCurrency, formatNumber } from "@/lib/format"
 import type { CumulativePoint } from "@/types/vesting"
+
+type ChartMode = "shares" | "value"
+const CHART_MODE_KEY = "vsop-cumulative-chart-mode"
 
 const chartConfig = {
   totalVested: {
@@ -41,10 +45,22 @@ interface CumulativeChartProps {
 }
 
 export function CumulativeChart({ data }: CumulativeChartProps) {
+  const [mode, setMode] = useState<ChartMode>(() => {
+    const stored = localStorage.getItem(CHART_MODE_KEY)
+    return stored === "value" ? "value" : "shares"
+  })
+
+  function handleModeChange(newMode: string | number) {
+    const m = newMode as ChartMode
+    setMode(m)
+    localStorage.setItem(CHART_MODE_KEY, m)
+  }
+
+  const isValue = mode === "value"
   const chartData = data.map((p) => ({
     date: p.date.getTime(),
-    totalVested: p.totalVested,
-    totalUnvested: p.totalUnvested,
+    totalVested: isValue ? p.totalVestedValue : p.totalVested,
+    totalUnvested: isValue ? p.totalUnvestedValue : p.totalUnvested,
   }))
 
   const [now] = useState(Date.now)
@@ -57,10 +73,20 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Cumulative Vesting</CardTitle>
-        <CardDescription>
-          Total vested and unvested shares across all grants
-        </CardDescription>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Cumulative Vesting</CardTitle>
+            <CardDescription>
+              Total vested and unvested {isValue ? "value" : "shares"} across all grants
+            </CardDescription>
+          </div>
+          <Tabs value={mode} onValueChange={handleModeChange}>
+            <TabsList>
+              <TabsTrigger value="shares">Shares</TabsTrigger>
+              <TabsTrigger value="value">Value</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
       </CardHeader>
       <CardContent>
         <ChartContainer config={chartConfig} className="aspect-[2/1] w-full">
@@ -97,8 +123,8 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
             <YAxis
               tickLine={false}
               axisLine={false}
-              width={60}
-              tickFormatter={(v: number) => formatNumber(v)}
+              width={isValue ? 80 : 60}
+              tickFormatter={(v: number) => isValue ? formatCurrency(v) : formatNumber(v)}
             />
             <ChartTooltip
               content={

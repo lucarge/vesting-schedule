@@ -208,6 +208,7 @@ export function SettingsPage() {
                   localStorage.removeItem("vsop-grants")
                   localStorage.removeItem("vsop-column-config")
                   localStorage.removeItem("vsop-sort-config")
+                  localStorage.removeItem("vsop-cumulative-chart-mode")
                   localStorage.removeItem("theme")
                   window.location.reload()
                 }}

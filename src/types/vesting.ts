@@ -21,4 +21,6 @@ export interface CumulativePoint {
   date: Date
   totalVested: number
   totalUnvested: number
+  totalVestedValue: number
+  totalUnvestedValue: number
 }

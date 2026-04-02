@@ -95,6 +95,13 @@ export function computeCumulativeTimeline(
 
   const timelines = grants.map(computeGrantTimeline)
   const totalShares = grants.reduce((s, g) => s + g.grantedAmount, 0)
+  const valuesPerShare = grants.map((g) =>
+    g.grantedAmount > 0 ? g.vsopsValue / g.grantedAmount : 0,
+  )
+  const totalValue = grants.reduce(
+    (s, _, i) => s + grants[i].grantedAmount * valuesPerShare[i],
+    0,
+  )
 
   // Collect all unique dates and sort
   const dateSet = new Map<number, Date>()
@@ -115,7 +122,9 @@ export function computeCumulativeTimeline(
   const points: CumulativePoint[] = []
   for (const date of sortedDates) {
     let totalVested = 0
-    for (const tl of timelines) {
+    let totalVestedValue = 0
+    for (let j = 0; j < timelines.length; j++) {
+      const tl = timelines[j]
       // Find the last event at or before this date
       let vested = 0
       for (const ev of tl.events) {
@@ -124,11 +133,14 @@ export function computeCumulativeTimeline(
         }
       }
       totalVested += vested
+      totalVestedValue += vested * valuesPerShare[j]
     }
     points.push({
       date,
       totalVested,
       totalUnvested: totalShares - totalVested,
+      totalVestedValue,
+      totalUnvestedValue: totalValue - totalVestedValue,
     })
   }
 
