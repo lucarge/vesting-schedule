@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-VSOP (Virtual Stock Option Plan) vesting schedule tracker. Client-only React + TypeScript website that lets users fill in grant details via a form and displays metrics and graphs for the vesting schedule.
+VestWise (vestwise.app) — stock option vesting tracker. Client-only React + TypeScript website that lets users fill in grant details via a form and displays metrics and graphs for the vesting schedule.
 
 ## Tech Stack
 

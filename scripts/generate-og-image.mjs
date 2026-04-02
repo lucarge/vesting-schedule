@@ -20,14 +20,17 @@ iconSvg = iconSvg
   .replace('width="24"', `width="${ICON_SIZE}"`)
   .replace('height="24"', `height="${ICON_SIZE}"`);
 
-// Title text as SVG overlay
-const titleSvg = `<svg width="${WIDTH}" height="80" xmlns="http://www.w3.org/2000/svg">
-  <text x="50%" y="60" text-anchor="middle"
+// Title and tagline as SVG overlay
+const titleSvg = `<svg width="${WIDTH}" height="120" xmlns="http://www.w3.org/2000/svg">
+  <text x="50%" y="50" text-anchor="middle"
     font-family="system-ui, -apple-system, sans-serif" font-size="48" font-weight="600"
-    fill="white">Vesting Schedule</text>
+    fill="white">VestWise</text>
+  <text x="50%" y="95" text-anchor="middle"
+    font-family="system-ui, -apple-system, sans-serif" font-size="24" font-weight="400"
+    fill="#a3a3a3">Your stock options, finally clear.</text>
 </svg>`;
 
-const iconTop = Math.round((HEIGHT - ICON_SIZE - 100) / 2);
+const iconTop = Math.round((HEIGHT - ICON_SIZE - 140) / 2);
 const titleTop = iconTop + ICON_SIZE + 20;
 
 await sharp({

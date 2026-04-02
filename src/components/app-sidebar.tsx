@@ -34,7 +34,7 @@ export function AppSidebar() {
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground [&_svg]:size-4">
                 <ChartColumnBigIcon />
               </div>
-              <span className="font-semibold">Vesting Schedule</span>
+              <span className="font-semibold">VestWise</span>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>

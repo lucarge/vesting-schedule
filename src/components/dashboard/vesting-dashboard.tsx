@@ -23,7 +23,7 @@ export function VestingDashboard({ grants }: VestingDashboardProps) {
         <ChartColumnBig className="size-12 text-muted-foreground/50" />
         <div className="flex flex-col gap-1.5">
           <h2 className="text-lg font-semibold">
-            Track your VSOP vesting schedule
+            Track your stock options
           </h2>
           <p className="max-w-sm text-sm text-muted-foreground">
             Add your stock option grants to visualize vesting progress, see
