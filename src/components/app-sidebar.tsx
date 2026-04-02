@@ -4,6 +4,7 @@ import {
   FileTextIcon,
   LayoutDashboardIcon,
   SettingsIcon,
+  TrendingUpIcon,
 } from "lucide-react"
 
 import {
@@ -20,6 +21,7 @@ import {
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboardIcon },
   { to: "/grants", label: "Grants", icon: FileTextIcon },
+  { to: "/potential", label: "Stock Potential", icon: TrendingUpIcon },
 ]
 
 export function AppSidebar() {
