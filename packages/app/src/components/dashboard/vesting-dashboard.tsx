@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useVesting } from "@/hooks/use-vesting"
 import type { Grant } from "@/types/grant"
-import { ChartColumnBig, Plus } from "lucide-react"
+import { ChartNoAxesCombined, Plus } from "lucide-react"
 import { Link } from "react-router"
 import { CumulativeChart } from "./cumulative-chart"
 import { GrantVestingChart } from "./grant-vesting-chart"
@@ -20,7 +20,7 @@ export function VestingDashboard({ grants }: VestingDashboardProps) {
   if (grants.length === 0) {
     return (
       <Card className="flex flex-col items-center justify-center gap-4 py-24 text-center">
-        <ChartColumnBig className="size-12 text-muted-foreground/50" />
+        <ChartNoAxesCombined className="size-12 text-muted-foreground/50" />
         <div className="flex flex-col gap-1.5">
           <h2 className="text-lg font-semibold">
             Track your stock options

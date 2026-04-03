@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom"
 import {
-  ChartColumnBigIcon,
+  ChartNoAxesCombinedIcon,
   FileTextIcon,
   LayoutDashboardIcon,
   SettingsIcon,
@@ -34,7 +34,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg">
               <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground [&_svg]:size-4">
-                <ChartColumnBigIcon />
+                <ChartNoAxesCombinedIcon />
               </div>
               <span className="font-semibold">VestWise</span>
             </SidebarMenuButton>
