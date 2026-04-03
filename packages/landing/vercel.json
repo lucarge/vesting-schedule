@@ -1,4 +1,5 @@
 {
+  "ignoreCommand": "git fetch --deepen=2 && ! git diff --quiet HEAD~1 HEAD -- packages/landing/",
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
   ]
