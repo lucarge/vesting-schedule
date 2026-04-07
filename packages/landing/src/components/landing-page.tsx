@@ -1,41 +1,14 @@
 import {
   Sun,
   Moon,
-  CalendarClock,
-  BarChart3,
-  FileSpreadsheet,
-  TrendingUp,
   ArrowRight,
   ChartNoAxesCombined,
 } from "lucide-react"
 import { useTheme } from "@/components/theme-provider"
-
-const features = [
-  {
-    icon: CalendarClock,
-    title: "Vesting schedules",
-    description:
-      "Enter your grant details once and see exactly when each tranche vests. Supports cliffs, monthly and yearly cadences, and custom periods.",
-  },
-  {
-    icon: BarChart3,
-    title: "Milestone visualization",
-    description:
-      "Interactive charts break down your vesting timeline into clear milestones. See cumulative progress and what's coming next at a glance.",
-  },
-  {
-    icon: FileSpreadsheet,
-    title: "Multi-grant management",
-    description:
-      "Track multiple grants across different dates, strike prices, and vesting terms. Everything in one place, nothing to reconcile.",
-  },
-  {
-    icon: TrendingUp,
-    title: "Stock potential analysis",
-    description:
-      "Model future valuations and dilution scenarios to understand what your equity could actually be worth at various outcomes.",
-  },
-]
+import { HeroChart } from "@/components/hero-chart"
+import { TrustBadges } from "@/components/trust-badges"
+import { CumulativeSection, MultiGrantSection, YearlySection } from "@/components/feature-sections"
+import { ScrollAnimate } from "@/components/scroll-animate"
 
 function ThemeToggle() {
   const { theme, setTheme } = useTheme()
@@ -94,8 +67,8 @@ function Hero() {
         />
       </div>
 
-      <div className="mx-auto max-w-5xl px-6 pb-24 pt-24 sm:pb-32 sm:pt-32 md:pt-40 md:pb-40">
-        <div className="max-w-2xl">
+      <div className="relative z-10 mx-auto max-w-5xl px-6 pt-24 sm:pt-32 md:pt-40">
+        <div className="mx-auto max-w-2xl text-center">
           <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
             Stock option tracker
           </p>
@@ -104,12 +77,12 @@ function Hero() {
             <br />
             finally clear.
           </h1>
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+          <p className="mx-auto mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
             VestWise helps you understand your equity. Track vesting
             schedules, visualize milestones, and model what your options
             could be worth.
           </p>
-          <div className="mt-10 flex items-center gap-4">
+          <div className="mt-10 flex items-center justify-center gap-4">
             <a
               href="https://app.vestwise.app"
               className="inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
@@ -123,38 +96,16 @@ function Hero() {
           </div>
         </div>
       </div>
-    </section>
-  )
-}
 
-function Features() {
-  return (
-    <section className="border-t border-border/50">
-      <div className="mx-auto max-w-5xl px-6 py-24 sm:py-32">
-        <div className="max-w-md">
-          <p className="text-sm font-medium tracking-widest text-muted-foreground uppercase">
-            Features
-          </p>
-          <h2 className="mt-3 text-2xl font-bold tracking-tight sm:text-3xl">
-            Everything you need to
-            <br />
-            track your equity
-          </h2>
+      {/* Chart blending into the background */}
+      <div className="relative -mt-4 sm:-mt-8">
+        <div className="mx-auto max-w-6xl px-6">
+          <HeroChart />
         </div>
-        <div className="mt-16 grid gap-px overflow-hidden rounded-lg border border-border bg-border sm:grid-cols-2">
-          {features.map((feature) => (
-            <div
-              key={feature.title}
-              className="flex flex-col gap-3 bg-background p-8"
-            >
-              <feature.icon className="size-5 text-muted-foreground" />
-              <h3 className="text-sm font-semibold">{feature.title}</h3>
-              <p className="text-sm leading-relaxed text-muted-foreground">
-                {feature.description}
-              </p>
-            </div>
-          ))}
-        </div>
+        {/* Fade edges into background */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 left-0 w-24 bg-gradient-to-r from-background to-transparent sm:w-32" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-24 bg-gradient-to-l from-background to-transparent sm:w-32" />
       </div>
     </section>
   )
@@ -164,22 +115,24 @@ function CallToAction() {
   return (
     <section className="border-t border-border/50">
       <div className="mx-auto max-w-5xl px-6 py-24 sm:py-32">
-        <div className="flex flex-col items-center text-center">
-          <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
-            Start tracking your vesting
-          </h2>
-          <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
-            No account needed. Your data stays in your browser. Open the
-            app and add your first grant in under a minute.
-          </p>
-          <a
-            href="https://app.vestwise.app"
-            className="mt-8 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Open app
-            <ArrowRight className="size-4" />
-          </a>
-        </div>
+        <ScrollAnimate>
+          <div className="flex flex-col items-center text-center">
+            <h2 className="text-2xl font-bold tracking-tight sm:text-3xl">
+              Start tracking your vesting
+            </h2>
+            <p className="mt-3 max-w-md text-sm leading-relaxed text-muted-foreground">
+              No account needed. Your data stays in your browser. Open the
+              app and add your first grant in under a minute.
+            </p>
+            <a
+              href="https://app.vestwise.app"
+              className="mt-8 inline-flex items-center gap-2 rounded-md bg-primary px-6 py-3 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            >
+              Open app
+              <ArrowRight className="size-4" />
+            </a>
+          </div>
+        </ScrollAnimate>
       </div>
     </section>
   )
@@ -207,7 +160,10 @@ export function LandingPage() {
       <Header />
       <main>
         <Hero />
-        <Features />
+        <TrustBadges />
+        <CumulativeSection />
+        <MultiGrantSection />
+        <YearlySection />
         <CallToAction />
       </main>
       <Footer />
