@@ -169,9 +169,9 @@ export const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
 
 export const DEFAULT_COLUMN_CONFIG: ColumnConfig[] = [
   { id: "grantDate", visible: true },
-  { id: "schedule", visible: true },
-  { id: "vestingPeriod", visible: true },
-  { id: "cliff", visible: true },
+  { id: "schedule", visible: false },
+  { id: "vestingPeriod", visible: false },
+  { id: "cliff", visible: false },
   { id: "shares", visible: true },
   { id: "value", visible: true },
   { id: "strikePrice", visible: true },

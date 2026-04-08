@@ -75,7 +75,7 @@ export function GrantTable({ grants, totals, valuations, onEditGrant, onRemoveGr
       </CardHeader>
       <CardContent>
         <TooltipProvider>
-          <Table>
+          <Table className="whitespace-nowrap">
             <TableHeader>
               <TableRow>
                 {visibleColumns.map((col) => (
