@@ -1,10 +1,10 @@
 import type { ReactNode } from "react"
 
-import type { Grant } from "@/types/grant"
 import type { GrantTotals } from "@/hooks/use-grants"
 import { formatCurrency, formatDate, formatNumber } from "@/lib/format"
+import type { GrantWithValuation } from "@/lib/valuation"
 
-const SCHEDULE_LABELS: Record<Grant["vestingSchedule"], string> = {
+const SCHEDULE_LABELS: Record<GrantWithValuation["vestingSchedule"], string> = {
   monthly: "Monthly",
   quarterly: "Quarterly",
   yearly: "Yearly",
@@ -19,8 +19,12 @@ export type ColumnId =
   | "value"
   | "strikePrice"
   | "netValue"
-  | "valuation"
+  | "appreciation"
   | "ownership"
+
+export interface ColumnTotals extends GrantTotals {
+  totalOwnership: number
+}
 
 export interface ColumnDef {
   id: ColumnId
@@ -28,9 +32,9 @@ export interface ColumnDef {
   align: "left" | "right"
   tooltip?: string
   footerColor?: "green" | "red"
-  sortValue?: (grant: Grant) => number | string
-  renderCell: (grant: Grant) => ReactNode
-  renderFooter?: (totals: GrantTotals) => ReactNode
+  sortValue?: (grant: GrantWithValuation) => number | string
+  renderCell: (grant: GrantWithValuation) => ReactNode
+  renderFooter?: (totals: ColumnTotals) => ReactNode
 }
 
 export interface ColumnConfig {
@@ -117,14 +121,33 @@ export const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
     renderFooter: (totals) =>
       formatCurrency(totals.totalVsopsValue - totals.totalStrikeCost),
   },
-  valuation: {
-    id: "valuation",
-    label: "Valuation",
+  appreciation: {
+    id: "appreciation",
+    label: "Appreciation",
     align: "right",
-    tooltip: "Company valuation at the time of the grant",
-    sortValue: (grant) => grant.companyValuation || 0,
-    renderCell: (grant) =>
-      grant.companyValuation ? formatCurrency(grant.companyValuation) : "—",
+    tooltip:
+      "How much the grant's value has grown based on company valuation changes",
+    sortValue: (grant) => {
+      if (!grant.applicableValuation || !grant.latestValuation) return 0
+      return (
+        ((grant.latestValuation - grant.applicableValuation) /
+          grant.applicableValuation) *
+        100
+      )
+    },
+    renderCell: (grant) => {
+      if (!grant.applicableValuation || !grant.latestValuation) return "—"
+      const pct =
+        ((grant.latestValuation - grant.applicableValuation) /
+          grant.applicableValuation) *
+        100
+      const sign = pct >= 0 ? "+" : ""
+      const color =
+        pct >= 0
+          ? "text-emerald-600 dark:text-emerald-400"
+          : "text-red-600 dark:text-red-400"
+      return <span className={color}>{sign}{pct.toFixed(2)}%</span>
+    },
   },
   ownership: {
     id: "ownership",
@@ -132,12 +155,12 @@ export const COLUMN_DEFS: Record<ColumnId, ColumnDef> = {
     align: "right",
     tooltip: "Percentage of the company represented by this grant",
     sortValue: (grant) =>
-      grant.companyValuation
-        ? (grant.vsopsValue / grant.companyValuation) * 100
+      grant.applicableValuation
+        ? (grant.vsopsValue / grant.applicableValuation) * 100
         : 0,
     renderCell: (grant) =>
-      grant.companyValuation
-        ? `${((grant.vsopsValue / grant.companyValuation) * 100).toFixed(4)}%`
+      grant.applicableValuation
+        ? `${((grant.vsopsValue / grant.applicableValuation) * 100).toFixed(4)}%`
         : "—",
     renderFooter: (totals) =>
       totals.totalOwnership ? `${totals.totalOwnership.toFixed(4)}%` : "—",
@@ -153,6 +176,6 @@ export const DEFAULT_COLUMN_CONFIG: ColumnConfig[] = [
   { id: "value", visible: true },
   { id: "strikePrice", visible: true },
   { id: "netValue", visible: true },
-  { id: "valuation", visible: true },
+  { id: "appreciation", visible: true },
   { id: "ownership", visible: true },
 ]

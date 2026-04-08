@@ -1,8 +1,10 @@
 import { VestingDashboard } from "@/components/dashboard/vesting-dashboard"
 import { useGrants } from "@/hooks/use-grants"
+import { useValuations } from "@/hooks/use-valuations"
 
 export function DashboardPage() {
   const { grants } = useGrants()
+  const { valuations } = useValuations()
 
   return (
     <div className="flex flex-col gap-6">
@@ -12,7 +14,7 @@ export function DashboardPage() {
           Vesting progress and portfolio overview.
         </p>
       </div>
-      <VestingDashboard grants={grants} />
+      <VestingDashboard grants={grants} valuations={valuations} />
     </div>
   )
 }

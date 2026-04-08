@@ -6,6 +6,7 @@ import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Slider } from "@/components/ui/slider"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePotential } from "@/hooks/use-potential"
 import { formatCurrency } from "@/lib/format"
 import type { Grant } from "@/types/grant"
@@ -13,17 +14,24 @@ import { PotentialChart } from "./potential-chart"
 
 interface StockPotentialProps {
   grants: Grant[]
+  currentValuation?: number
+  calculatedDilution?: number
 }
 
-export function StockPotential({ grants }: StockPotentialProps) {
+export function StockPotential({ grants, currentValuation, calculatedDilution }: StockPotentialProps) {
   const {
     multiplier,
     setMultiplier,
     dilutionPercent,
     setDilutionPercent,
+    simulationMode,
+    setSimulationMode,
+    futureValuation,
+    setFutureValuation,
+    effectiveMultiplier,
     summary,
     curve,
-  } = usePotential(grants)
+  } = usePotential(grants, currentValuation, calculatedDilution)
 
   const [infoOpen, setInfoOpen] = useState(false)
 
@@ -90,40 +98,95 @@ export function StockPotential({ grants }: StockPotentialProps) {
 
       {/* Controls */}
       <Card className="p-4">
-        <div className="grid gap-6 md:grid-cols-2">
-          <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <Label>Valuation Multiple</Label>
-              <div className="flex items-center gap-1.5">
-                <Input
-                  type="number"
+        <div className="flex flex-col gap-6">
+          <Tabs
+            value={simulationMode}
+            onValueChange={(v) => setSimulationMode(v as "multiplier" | "valuation")}
+          >
+            <TabsList>
+              <TabsTrigger value="multiplier">Multiplier</TabsTrigger>
+              <TabsTrigger value="valuation" disabled={!currentValuation}>
+                Absolute Valuation
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="multiplier" className="mt-4">
+              <div className="flex flex-col gap-3">
+                <div className="flex items-center justify-between">
+                  <Label>Valuation Multiple</Label>
+                  <div className="flex items-center gap-1.5">
+                    <Input
+                      type="number"
+                      min={0.5}
+                      max={20}
+                      step={0.1}
+                      value={multiplier}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value)
+                        if (!isNaN(v) && v >= 0.5 && v <= 20) setMultiplier(v)
+                      }}
+                      className="h-7 w-16 text-center text-sm"
+                    />
+                    <span className="text-sm text-muted-foreground">x</span>
+                  </div>
+                </div>
+                <Slider
+                  value={[multiplier]}
+                  onValueChange={(v) => setMultiplier(Array.isArray(v) ? v[0] : v)}
                   min={0.5}
                   max={20}
                   step={0.1}
-                  value={multiplier}
-                  onChange={(e) => {
-                    const v = parseFloat(e.target.value)
-                    if (!isNaN(v) && v >= 0.5 && v <= 20) setMultiplier(v)
-                  }}
-                  className="h-7 w-16 text-center text-sm"
+                  aria-label="Valuation multiplier"
                 />
-                <span className="text-sm text-muted-foreground">x</span>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>0.5x</span>
+                  <span>10x</span>
+                  <span>20x</span>
+                </div>
               </div>
-            </div>
-            <Slider
-              value={[multiplier]}
-              onValueChange={(v) => setMultiplier(Array.isArray(v) ? v[0] : v)}
-              min={0.5}
-              max={20}
-              step={0.1}
-              aria-label="Valuation multiplier"
-            />
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>0.5x</span>
-              <span>10x</span>
-              <span>20x</span>
-            </div>
-          </div>
+            </TabsContent>
+
+            <TabsContent value="valuation" className="mt-4">
+              {currentValuation ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Current valuation</span>
+                    <span className="font-mono font-medium">
+                      {formatCurrency(currentValuation)}
+                    </span>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <Label>Future valuation (EUR)</Label>
+                    <Input
+                      type="number"
+                      min={0}
+                      step="1000"
+                      value={futureValuation}
+                      onChange={(e) => {
+                        const v = parseFloat(e.target.value)
+                        if (!isNaN(v) && v >= 0) setFutureValuation(v)
+                      }}
+                      placeholder="e.g. 50000000"
+                    />
+                  </div>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-muted-foreground">Implied multiplier</span>
+                    <span className="font-mono font-medium">
+                      {effectiveMultiplier.toFixed(2)}x
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-sm text-muted-foreground">
+                  Add a company valuation in the{" "}
+                  <Link to="/valuations" className="underline underline-offset-4">
+                    Valuations
+                  </Link>{" "}
+                  section to enable absolute valuation simulation.
+                </p>
+              )}
+            </TabsContent>
+          </Tabs>
 
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -158,6 +221,18 @@ export function StockPotential({ grants }: StockPotentialProps) {
               <span>50%</span>
               <span>75%</span>
             </div>
+            {calculatedDilution != null && calculatedDilution > 0 && (
+              <p className="text-xs text-muted-foreground">
+                Calculated from funding rounds: {calculatedDilution.toFixed(2)}%.{" "}
+                <button
+                  type="button"
+                  className="underline underline-offset-4 hover:text-foreground"
+                  onClick={() => setDilutionPercent(Math.round(calculatedDilution))}
+                >
+                  Reset to calculated
+                </button>
+              </p>
+            )}
           </div>
         </div>
       </Card>
@@ -202,7 +277,7 @@ export function StockPotential({ grants }: StockPotentialProps) {
       {/* Chart */}
       <PotentialChart
         data={curve}
-        multiplier={multiplier}
+        multiplier={effectiveMultiplier}
         dilutionPercent={dilutionPercent}
       />
     </div>

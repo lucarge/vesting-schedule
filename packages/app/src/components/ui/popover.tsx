@@ -8,10 +8,14 @@ const PopoverTrigger = PopoverPrimitive.Trigger
 function PopoverContent({
   className,
   sideOffset = 8,
+  container,
   ...props
-}: PopoverPrimitive.Popup.Props & { sideOffset?: number }) {
+}: PopoverPrimitive.Popup.Props & {
+  sideOffset?: number
+  container?: PopoverPrimitive.Portal.Props["container"]
+}) {
   return (
-    <PopoverPrimitive.Portal>
+    <PopoverPrimitive.Portal container={container}>
       <PopoverPrimitive.Positioner sideOffset={sideOffset}>
         <PopoverPrimitive.Popup
           className={cn(

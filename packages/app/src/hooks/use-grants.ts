@@ -6,7 +6,6 @@ export interface GrantTotals {
   totalGrantedAmount: number
   totalVsopsValue: number
   totalStrikeCost: number
-  totalOwnership: number
 }
 
 const STORAGE_KEY = "vsop-grants"
@@ -48,13 +47,6 @@ export function useGrants() {
       totalVsopsValue: grants.reduce((sum, g) => sum + g.vsopsValue, 0),
       totalStrikeCost: grants.reduce(
         (sum, g) => sum + g.vsopsStrikePrice * g.grantedAmount,
-        0,
-      ),
-      totalOwnership: grants.reduce(
-        (sum, g) =>
-          g.companyValuation
-            ? sum + (g.vsopsValue / g.companyValuation) * 100
-            : sum,
         0,
       ),
     }),

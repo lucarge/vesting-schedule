@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { useVesting } from "@/hooks/use-vesting"
 import type { Grant } from "@/types/grant"
+import type { ValuationEntry } from "@/types/valuation"
 import { ChartNoAxesCombined, Plus } from "lucide-react"
 import { Link } from "react-router"
 import { CumulativeChart } from "./cumulative-chart"
@@ -11,9 +12,10 @@ import { YearlySummary } from "./yearly-summary"
 
 interface VestingDashboardProps {
   grants: Grant[]
+  valuations: ValuationEntry[]
 }
 
-export function VestingDashboard({ grants }: VestingDashboardProps) {
+export function VestingDashboard({ grants, valuations }: VestingDashboardProps) {
   const { grantTimelines, cumulativeTimeline, yearlySummary } =
     useVesting(grants)
 
@@ -43,9 +45,9 @@ export function VestingDashboard({ grants }: VestingDashboardProps) {
 
   return (
     <div className="flex flex-col gap-6">
-      <VestingSummary grants={grants} />
+      <VestingSummary grants={grants} valuations={valuations} />
       <CumulativeChart data={cumulativeTimeline} />
-      <YearlySummary data={yearlySummary} />
+      <YearlySummary data={yearlySummary} valuations={valuations} grants={grants} />
       <div>
         <h3 className="mb-3 text-sm font-medium">All Grants</h3>
         <div className="grid gap-6 md:grid-cols-2">

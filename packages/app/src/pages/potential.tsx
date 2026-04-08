@@ -1,8 +1,13 @@
 import { StockPotential } from "@/components/potential/stock-potential"
 import { useGrants } from "@/hooks/use-grants"
+import { useValuations } from "@/hooks/use-valuations"
+import { computeCumulativeDilution, getLatestValuation } from "@/lib/valuation"
 
 export function PotentialPage() {
   const { grants } = useGrants()
+  const { valuations } = useValuations()
+  const latestValuation = getLatestValuation(valuations)
+  const calculatedDilution = computeCumulativeDilution(valuations)
 
   return (
     <div className="flex flex-col gap-6">
@@ -13,7 +18,11 @@ export function PotentialPage() {
           valuations.
         </p>
       </div>
-      <StockPotential grants={grants} />
+      <StockPotential
+        grants={grants}
+        currentValuation={latestValuation?.valuation}
+        calculatedDilution={calculatedDilution}
+      />
     </div>
   )
 }

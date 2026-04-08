@@ -31,8 +31,6 @@ const defaultFormData: GrantFormData = {
   grantedAmount: "",
   vsopsValue: "",
   vsopsStrikePrice: "",
-  companyValuation: "",
-  ownershipPercentage: "",
 }
 
 function grantToFormData(grant: Grant): GrantFormData {
@@ -44,8 +42,6 @@ function grantToFormData(grant: Grant): GrantFormData {
     grantedAmount: String(grant.grantedAmount),
     vsopsValue: String(grant.vsopsValue),
     vsopsStrikePrice: String(grant.vsopsStrikePrice),
-    companyValuation: grant.companyValuation ? String(grant.companyValuation) : "",
-    ownershipPercentage: "",
   }
 }
 
@@ -119,25 +115,6 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
       errs.vsopsStrikePrice = "Must be greater than 0"
     }
 
-    // Valuation is optional, but if provided must be > 0
-    if (form.companyValuation) {
-      const valuation = parseFloat(form.companyValuation)
-      if (isNaN(valuation) || valuation <= 0) {
-        errs.companyValuation = "Must be greater than 0"
-      }
-    }
-
-    // Ownership is optional, but if provided must be between 0 and 100
-    if (form.ownershipPercentage) {
-      const ownership = parseFloat(form.ownershipPercentage)
-      if (isNaN(ownership) || ownership <= 0 || ownership > 100) {
-        errs.ownershipPercentage = "Must be between 0 and 100"
-      }
-    }
-
-    // If both are provided, they must be consistent — but we just let valuation win
-    // No cross-field error needed
-
     return Object.keys(errs).length > 0 ? errs : null
   }
 
@@ -155,15 +132,6 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
         ? parseFloat(form.vsopsValue) * parseFloat(form.grantedAmount)
         : parseFloat(form.vsopsValue)
 
-    let companyValuation: number | undefined
-    if (form.companyValuation) {
-      companyValuation = parseFloat(form.companyValuation)
-    } else if (form.ownershipPercentage) {
-      // ownership% = (value / valuation) * 100
-      // valuation = value / (ownership% / 100)
-      companyValuation = totalValue / (parseFloat(form.ownershipPercentage) / 100)
-    }
-
     const grant: Grant = {
       id: isEditing ? initialGrant.id : crypto.randomUUID(),
       grantDate: form.grantDate!,
@@ -173,7 +141,6 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
       grantedAmount: parseFloat(form.grantedAmount),
       vsopsValue: totalValue,
       vsopsStrikePrice: parseFloat(form.vsopsStrikePrice),
-      companyValuation,
     }
 
     if (isEditing) {
@@ -185,9 +152,6 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
       setValueMode("total")
     }
   }
-
-  const hasValuation = !!form.companyValuation
-  const hasOwnership = !!form.ownershipPercentage
 
   const formContent = (
     <TooltipProvider>
@@ -330,41 +294,6 @@ export function GrantForm({ onAddGrant, initialGrant, onUpdateGrant, className }
                 value={form.vsopsStrikePrice}
                 onChange={(e) => updateField("vsopsStrikePrice", e.target.value)}
                 aria-invalid={!!errors.vsopsStrikePrice}
-              />
-            </Field>
-
-            <Field
-              label="Company valuation (EUR)"
-              tooltip="Company valuation at the time of the grant. Optional — only needed to calculate ownership percentage"
-              error={errors.companyValuation}
-            >
-              <Input
-                type="number"
-                min={0}
-                step="0.01"
-                placeholder="e.g. 10000000"
-                value={form.companyValuation}
-                onChange={(e) => updateField("companyValuation", e.target.value)}
-                aria-invalid={!!errors.companyValuation}
-                disabled={hasOwnership}
-              />
-            </Field>
-
-            <Field
-              label="Ownership (%)"
-              tooltip="Your ownership percentage. Alternative to company valuation — the valuation will be calculated from this"
-              error={errors.ownershipPercentage}
-            >
-              <Input
-                type="number"
-                min={0}
-                max={100}
-                step="0.0001"
-                placeholder="e.g. 0.5"
-                value={form.ownershipPercentage}
-                onChange={(e) => updateField("ownershipPercentage", e.target.value)}
-                aria-invalid={!!errors.ownershipPercentage}
-                disabled={hasValuation}
               />
             </Field>
 

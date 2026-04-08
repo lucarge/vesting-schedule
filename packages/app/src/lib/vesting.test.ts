@@ -16,7 +16,6 @@ function makeGrant(overrides: Partial<Grant> = {}): Grant {
     grantedAmount: 12,
     vsopsValue: 1200,
     vsopsStrikePrice: 10,
-    companyValuation: 100000,
     ...overrides,
   }
 }

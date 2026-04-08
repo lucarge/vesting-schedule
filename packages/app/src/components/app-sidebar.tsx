@@ -2,6 +2,7 @@ import { NavLink, useLocation } from "react-router-dom"
 import {
   ChartNoAxesCombinedIcon,
   FileTextIcon,
+  LandmarkIcon,
   LayoutDashboardIcon,
   SettingsIcon,
   TrendingUpIcon,
@@ -21,6 +22,7 @@ import {
 const navItems = [
   { to: "/", label: "Dashboard", icon: LayoutDashboardIcon },
   { to: "/grants", label: "Grants", icon: FileTextIcon },
+  { to: "/valuations", label: "Valuations", icon: LandmarkIcon },
   { to: "/potential", label: "Stock Potential", icon: TrendingUpIcon },
 ]
 

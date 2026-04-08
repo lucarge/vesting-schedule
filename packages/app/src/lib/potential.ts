@@ -38,6 +38,16 @@ export function computePotentialAtMultiplier(
   }
 }
 
+export function computePotentialAtValuation(
+  grants: Grant[],
+  currentValuation: number,
+  futureValuation: number,
+  dilutionPercent: number,
+): PotentialSummary {
+  const multiplier = futureValuation / currentValuation
+  return computePotentialAtMultiplier(grants, multiplier, dilutionPercent)
+}
+
 export function computePotentialCurve(
   grants: Grant[],
   dilutionPercent: number,

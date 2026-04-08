@@ -25,13 +25,16 @@ import {
 } from "@/components/ui/tooltip"
 import { ColumnConfigPopover } from "@/components/column-config-popover"
 import type { Grant } from "@/types/grant"
+import type { ValuationEntry } from "@/types/valuation"
 import type { GrantTotals } from "@/hooks/use-grants"
 import { useColumnConfig } from "@/hooks/use-column-config"
+import { enrichGrantsWithValuation, computeTotalOwnership } from "@/lib/valuation"
 import { cn } from "@/lib/utils"
 
 interface GrantTableProps {
   grants: Grant[]
   totals: GrantTotals
+  valuations: ValuationEntry[]
   onEditGrant: (grant: Grant) => void
   onRemoveGrant: (id: string) => void
 }
@@ -41,7 +44,7 @@ const FOOTER_COLOR_CLASSES = {
   red: "text-red-600 dark:text-red-400",
 } as const
 
-export function GrantTable({ grants, totals, onEditGrant, onRemoveGrant }: GrantTableProps) {
+export function GrantTable({ grants, totals, valuations, onEditGrant, onRemoveGrant }: GrantTableProps) {
   const {
     columnConfig,
     visibleColumns,
@@ -53,7 +56,9 @@ export function GrantTable({ grants, totals, onEditGrant, onRemoveGrant }: Grant
     sortGrants,
   } = useColumnConfig()
 
-  const sortedGrants = sortGrants(grants)
+  const enrichedGrants = enrichGrantsWithValuation(grants, valuations)
+  const sortedGrants = sortGrants(enrichedGrants)
+  const columnTotals = { ...totals, totalOwnership: computeTotalOwnership(enrichedGrants) }
 
   return (
     <Card>
@@ -176,7 +181,7 @@ export function GrantTable({ grants, totals, onEditGrant, onRemoveGrant }: Grant
                       {idx === 0
                         ? "Total"
                         : col.renderFooter
-                          ? col.renderFooter(totals)
+                          ? col.renderFooter(columnTotals)
                           : null}
                     </TableCell>
                   ))}

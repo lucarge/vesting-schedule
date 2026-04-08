@@ -16,6 +16,7 @@ import {
 interface BackupData {
   version: number
   grants: unknown[]
+  valuations?: unknown[]
   columnConfig?: unknown[]
   theme?: string
 }
@@ -25,7 +26,7 @@ function isValidBackup(data: unknown): data is BackupData {
     typeof data === "object" &&
     data !== null &&
     "version" in data &&
-    (data as BackupData).version === 1 &&
+    ((data as BackupData).version === 1 || (data as BackupData).version === 2) &&
     "grants" in data &&
     Array.isArray((data as BackupData).grants)
   )
@@ -33,8 +34,9 @@ function isValidBackup(data: unknown): data is BackupData {
 
 function exportData() {
   const backup: BackupData = {
-    version: 1,
+    version: 2,
     grants: JSON.parse(localStorage.getItem("vsop-grants") || "[]"),
+    valuations: JSON.parse(localStorage.getItem("vsop-valuations") || "[]"),
     columnConfig: JSON.parse(
       localStorage.getItem("vsop-column-config") || "[]",
     ),
@@ -84,6 +86,9 @@ export function SettingsPage() {
 
   function applyBackup(backup: BackupData) {
     localStorage.setItem("vsop-grants", JSON.stringify(backup.grants))
+    if (backup.valuations) {
+      localStorage.setItem("vsop-valuations", JSON.stringify(backup.valuations))
+    }
     if (backup.columnConfig) {
       localStorage.setItem(
         "vsop-column-config",
@@ -197,8 +202,8 @@ export function SettingsPage() {
         {pendingClear && (
           <div className="rounded-md border border-destructive bg-muted/50 p-3 space-y-2">
             <p className="text-xs">
-              This will permanently delete all your grants, column preferences,
-              and theme settings. This cannot be undone.
+              This will permanently delete all your grants, valuations, column
+              preferences, and theme settings. This cannot be undone.
             </p>
             <div className="flex gap-2">
               <Button
@@ -206,6 +211,7 @@ export function SettingsPage() {
                 variant="destructive"
                 onClick={() => {
                   localStorage.removeItem("vsop-grants")
+                  localStorage.removeItem("vsop-valuations")
                   localStorage.removeItem("vsop-column-config")
                   localStorage.removeItem("vsop-sort-config")
                   localStorage.removeItem("vsop-cumulative-chart-mode")
