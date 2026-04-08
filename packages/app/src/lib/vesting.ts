@@ -1,11 +1,13 @@
 import { addMonths, getYear } from "date-fns"
 import type { Grant } from "@/types/grant"
+import type { ValuationEntry } from "@/types/valuation"
 import type {
   CumulativePoint,
   GrantVestingTimeline,
   VestingEvent,
   YearlySummary,
 } from "@/types/vesting"
+import { getAppreciationMultiplier } from "@/lib/valuation"
 
 function periodMonths(schedule: Grant["vestingSchedule"]): number {
   switch (schedule) {
@@ -90,6 +92,7 @@ export function computeGrantTimeline(grant: Grant): GrantVestingTimeline {
 
 export function computeCumulativeTimeline(
   grants: Grant[],
+  valuations?: ValuationEntry[],
 ): CumulativePoint[] {
   if (grants.length === 0) return []
 
@@ -102,6 +105,12 @@ export function computeCumulativeTimeline(
     (s, _, i) => s + grants[i].grantedAmount * valuesPerShare[i],
     0,
   )
+
+  // Compute per-grant appreciation multipliers
+  const appreciationMultipliers = valuations
+    ? grants.map((g) => getAppreciationMultiplier(valuations, g.grantDate))
+    : grants.map(() => undefined)
+  const hasAppreciation = appreciationMultipliers.some((m) => m !== undefined)
 
   // Collect all unique dates and sort
   const dateSet = new Map<number, Date>()
@@ -123,6 +132,7 @@ export function computeCumulativeTimeline(
   for (const date of sortedDates) {
     let totalVested = 0
     let totalVestedValue = 0
+    let totalAppreciatedVestedValue = 0
     for (let j = 0; j < timelines.length; j++) {
       const tl = timelines[j]
       // Find the last event at or before this date
@@ -134,6 +144,8 @@ export function computeCumulativeTimeline(
       }
       totalVested += vested
       totalVestedValue += vested * valuesPerShare[j]
+      totalAppreciatedVestedValue +=
+        vested * valuesPerShare[j] * (appreciationMultipliers[j] ?? 1)
     }
     points.push({
       date,
@@ -141,6 +153,9 @@ export function computeCumulativeTimeline(
       totalUnvested: totalShares - totalVested,
       totalVestedValue,
       totalUnvestedValue: totalValue - totalVestedValue,
+      ...(hasAppreciation
+        ? { totalAppreciatedVestedValue }
+        : {}),
     })
   }
 

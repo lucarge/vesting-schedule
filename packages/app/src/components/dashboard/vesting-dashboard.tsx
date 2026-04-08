@@ -17,7 +17,7 @@ interface VestingDashboardProps {
 
 export function VestingDashboard({ grants, valuations }: VestingDashboardProps) {
   const { grantTimelines, cumulativeTimeline, yearlySummary } =
-    useVesting(grants)
+    useVesting(grants, valuations)
 
   if (grants.length === 0) {
     return (

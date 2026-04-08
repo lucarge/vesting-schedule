@@ -23,4 +23,5 @@ export interface CumulativePoint {
   totalUnvested: number
   totalVestedValue: number
   totalUnvestedValue: number
+  totalAppreciatedVestedValue?: number
 }

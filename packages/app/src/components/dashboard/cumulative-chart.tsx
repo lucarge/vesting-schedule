@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Area, AreaChart, CartesianGrid, ReferenceLine, XAxis, YAxis } from "recharts"
+import { Area, AreaChart, CartesianGrid, Line, ReferenceLine, XAxis, YAxis } from "recharts"
 import {
   Card,
   CardContent,
@@ -22,7 +22,7 @@ import type { CumulativePoint } from "@/types/vesting"
 type ChartMode = "shares" | "value"
 const CHART_MODE_KEY = "vsop-cumulative-chart-mode"
 
-const chartConfig = {
+const baseChartConfig = {
   totalVested: {
     label: "Vested",
     color: "var(--color-chart-5)",
@@ -57,10 +57,42 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
   }
 
   const isValue = mode === "value"
+
+  // Check if appreciation/depreciation exceeds 10% threshold
+  const lastPoint = data[data.length - 1]
+  const appreciationPct =
+    lastPoint?.totalAppreciatedVestedValue !== undefined &&
+    lastPoint.totalVestedValue > 0
+      ? ((lastPoint.totalAppreciatedVestedValue - lastPoint.totalVestedValue) /
+          lastPoint.totalVestedValue) *
+        100
+      : 0
+  const showAppreciation =
+    isValue && Math.abs(appreciationPct) > 10
+  const isPositive = appreciationPct >= 0
+  const appreciationColor = isPositive
+    ? "oklch(0.6 0.18 145)"
+    : "oklch(0.6 0.18 25)"
+
+  const chartConfig: ChartConfig = {
+    ...baseChartConfig,
+    ...(showAppreciation
+      ? {
+          appreciatedValue: {
+            label: "Current Value",
+            color: appreciationColor,
+          },
+        }
+      : {}),
+  }
+
   const chartData = data.map((p) => ({
     date: p.date.getTime(),
     totalVested: isValue ? p.totalVestedValue : p.totalVested,
     totalUnvested: isValue ? p.totalUnvestedValue : p.totalUnvested,
+    ...(showAppreciation
+      ? { appreciatedValue: p.totalAppreciatedVestedValue }
+      : {}),
   }))
 
   const [now] = useState(Date.now)
@@ -109,6 +141,12 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
                   <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={1} />
                   <stop offset={todayPct} stopColor="var(--color-totalUnvested)" stopOpacity={0.3} />
                 </linearGradient>
+                {showAppreciation && (
+                  <linearGradient id="appreciatedStrokeFade" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset={todayPct} stopColor={appreciationColor} stopOpacity={1} />
+                    <stop offset={todayPct} stopColor={appreciationColor} stopOpacity={0.3} />
+                  </linearGradient>
+                )}
               </defs>
             )}
             <CartesianGrid vertical={false} />
@@ -133,6 +171,31 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
                     const ts = payload?.[0]?.payload?.date as number | undefined
                     return ts ? formatMonthYear(new Date(ts)) : ""
                   }}
+                  formatter={(value, name) => {
+                    const v = value as number
+                    const formatted = isValue
+                      ? new Intl.NumberFormat("de-DE", {
+                          style: "currency",
+                          currency: "EUR",
+                          maximumFractionDigits: 0,
+                        }).format(v)
+                      : formatNumber(Math.round(v))
+                    const config = chartConfig[name as keyof typeof chartConfig]
+                    const isAppreciated = name === "appreciatedValue"
+                    return (
+                      <div className="flex w-full items-center justify-between gap-4">
+                        <span className="text-muted-foreground">
+                          {config?.label}
+                        </span>
+                        <span
+                          className="font-mono font-medium"
+                          style={isAppreciated ? { color: appreciationColor } : undefined}
+                        >
+                          {formatted}
+                        </span>
+                      </div>
+                    )
+                  }}
                 />
               }
             />
@@ -153,6 +216,15 @@ export function CumulativeChart({ data }: CumulativeChartProps) {
               stroke={todayPct ? "url(#unvestedStrokeFade)" : "var(--color-totalUnvested)"}
               fillOpacity={todayPct ? 1 : 0.3}
             />
+            {showAppreciation && (
+              <Line
+                dataKey="appreciatedValue"
+                type="stepAfter"
+                dot={false}
+                stroke={todayPct ? "url(#appreciatedStrokeFade)" : appreciationColor}
+                strokeWidth={2}
+              />
+            )}
             {showToday && (
               <ReferenceLine
                 x={now}
