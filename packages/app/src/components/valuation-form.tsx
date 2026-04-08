@@ -129,7 +129,7 @@ export function ValuationForm({ onAdd, initialEntry, onUpdate, className }: Valu
               <CalendarIcon className="mr-1.5 size-4" />
               {form.date ? format(form.date, "MMM d, yyyy") : "Pick a date"}
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-3" container={formRef.current}>
+            <PopoverContent className="w-auto p-3" container={isEditing ? formRef.current : undefined}>
               <Calendar
                 mode="single"
                 captionLayout="dropdown"

@@ -34,7 +34,7 @@ function Calendar({
         weekday:
           "w-8 text-[0.8rem] font-normal text-muted-foreground text-center",
         week: "flex w-full mt-1",
-        day: "relative p-0 text-center text-sm",
+        day: "relative w-8 p-0 text-center text-sm",
         day_button: cn(
           buttonVariants({ variant: "ghost", size: "icon-xs" }),
           "size-8 rounded-md font-normal",
