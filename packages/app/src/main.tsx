@@ -1,6 +1,7 @@
 import { StrictMode } from "react"
 import { createRoot } from "react-dom/client"
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { Analytics } from "@vercel/analytics/react"
 
 import "./index.css"
 import { AppLayout } from "@/components/app-layout"
@@ -29,5 +30,6 @@ createRoot(document.getElementById("root")!).render(
         </Routes>
       </BrowserRouter>
     </ThemeProvider>
+    <Analytics />
   </StrictMode>
 )
