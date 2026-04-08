@@ -22,6 +22,7 @@ export function PotentialPage() {
         grants={grants}
         currentValuation={latestValuation?.valuation}
         calculatedDilution={calculatedDilution}
+        valuations={valuations}
       />
     </div>
   )

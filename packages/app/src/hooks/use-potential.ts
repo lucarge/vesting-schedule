@@ -4,12 +4,18 @@ import {
   computePotentialCurve,
 } from "@/lib/potential"
 import type { Grant } from "@/types/grant"
+import type { ValuationEntry } from "@/types/valuation"
 import { useMemo, useState } from "react"
 
 export type SimulationMode = "multiplier" | "valuation"
 
-export function usePotential(grants: Grant[], currentValuation?: number, calculatedDilution?: number) {
-  const [multiplier, setMultiplier] = useState(1.0)
+export function usePotential(
+  grants: Grant[],
+  currentValuation?: number,
+  calculatedDilution?: number,
+  valuations?: ValuationEntry[],
+) {
+  const [multiplier, setMultiplier] = useState(2)
   const [dilutionPercent, setDilutionPercent] = useState(
     calculatedDilution ? Math.round(calculatedDilution) : 0,
   )
@@ -27,14 +33,14 @@ export function usePotential(grants: Grant[], currentValuation?: number, calcula
 
   const summary = useMemo(() => {
     if (simulationMode === "valuation" && currentValuation && currentValuation > 0) {
-      return computePotentialAtValuation(grants, currentValuation, futureValuation, dilutionPercent)
+      return computePotentialAtValuation(grants, currentValuation, futureValuation, dilutionPercent, valuations)
     }
-    return computePotentialAtMultiplier(grants, multiplier, dilutionPercent)
-  }, [grants, multiplier, dilutionPercent, simulationMode, currentValuation, futureValuation])
+    return computePotentialAtMultiplier(grants, multiplier, dilutionPercent, valuations)
+  }, [grants, multiplier, dilutionPercent, simulationMode, currentValuation, futureValuation, valuations])
 
   const curve = useMemo(
-    () => computePotentialCurve(grants, dilutionPercent),
-    [grants, dilutionPercent],
+    () => computePotentialCurve(grants, dilutionPercent, valuations),
+    [grants, dilutionPercent, valuations],
   )
 
   return {

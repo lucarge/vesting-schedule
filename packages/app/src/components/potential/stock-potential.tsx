@@ -10,15 +10,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { usePotential } from "@/hooks/use-potential"
 import { formatCurrency } from "@/lib/format"
 import type { Grant } from "@/types/grant"
+import type { ValuationEntry } from "@/types/valuation"
 import { PotentialChart } from "./potential-chart"
 
 interface StockPotentialProps {
   grants: Grant[]
   currentValuation?: number
   calculatedDilution?: number
+  valuations?: ValuationEntry[]
 }
 
-export function StockPotential({ grants, currentValuation, calculatedDilution }: StockPotentialProps) {
+export function StockPotential({ grants, currentValuation, calculatedDilution, valuations }: StockPotentialProps) {
   const {
     multiplier,
     setMultiplier,
@@ -31,7 +33,7 @@ export function StockPotential({ grants, currentValuation, calculatedDilution }:
     effectiveMultiplier,
     summary,
     curve,
-  } = usePotential(grants, currentValuation, calculatedDilution)
+  } = usePotential(grants, currentValuation, calculatedDilution, valuations)
 
   const [infoOpen, setInfoOpen] = useState(false)
 
