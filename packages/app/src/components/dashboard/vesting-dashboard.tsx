@@ -47,7 +47,7 @@ export function VestingDashboard({ grants, valuations }: VestingDashboardProps) 
     <div className="flex flex-col gap-6">
       <VestingSummary grants={grants} valuations={valuations} />
       <CumulativeChart data={cumulativeTimeline} />
-      <YearlySummary data={yearlySummary} valuations={valuations} grants={grants} />
+      <YearlySummary data={yearlySummary} />
       <div>
         <h3 className="mb-3 text-sm font-medium">All Grants</h3>
         <div className="grid gap-6 md:grid-cols-2">

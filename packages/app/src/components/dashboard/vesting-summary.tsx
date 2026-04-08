@@ -12,7 +12,6 @@ interface VestingSummaryProps {
 }
 
 const green = "font-semibold text-emerald-600 dark:text-emerald-400"
-const amber = "font-semibold text-amber-600 dark:text-amber-400"
 
 export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
   const [now] = useState(Date.now)
@@ -26,7 +25,6 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
     let vestedValue = 0
     let vestedStrikeCost = 0
     let vestedAppreciatedValue = 0
-    let totalAppreciatedValue = 0
     let hasAppreciation = false
     let fullVestingDate: Date | null = null
 
@@ -37,7 +35,6 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
       const effectiveMultiplier = multiplier ?? 1
       if (multiplier !== undefined) hasAppreciation = true
 
-      // Find last event at or before today
       let grantVested = 0
       for (const ev of timeline.events) {
         if (ev.date.getTime() <= now) {
@@ -48,9 +45,7 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
       vestedValue += grantVested * valuePerShare
       vestedStrikeCost += grantVested * grant.vsopsStrikePrice
       vestedAppreciatedValue += grantVested * valuePerShare * effectiveMultiplier
-      totalAppreciatedValue += grant.vsopsValue * effectiveMultiplier
 
-      // Track the latest vesting event across all grants
       const lastEvent = timeline.events[timeline.events.length - 1]
       if (lastEvent) {
         if (!fullVestingDate || lastEvent.date > fullVestingDate) {
@@ -66,6 +61,11 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
       0,
     )
 
+    const appreciationPct =
+      hasAppreciation && vestedValue > 0
+        ? ((vestedAppreciatedValue - vestedValue) / vestedValue) * 100
+        : undefined
+
     return {
       vestedShares,
       vestedNetValue: vestedValue - vestedStrikeCost,
@@ -75,11 +75,9 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
       totalShares,
       totalNetValue: totalValue - totalStrikeCost,
       totalValue,
-      totalAppreciatedValue,
-      totalAppreciatedNetValue: totalAppreciatedValue - totalStrikeCost,
       fullVestingDate,
       isFullyVested: fullVestingDate ? now >= fullVestingDate.getTime() : false,
-      hasAppreciation,
+      appreciationPct,
     }
   }, [grants, valuations, now])
 
@@ -92,12 +90,24 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
     totalShares,
     totalNetValue,
     totalValue,
-    totalAppreciatedValue,
-    totalAppreciatedNetValue,
     fullVestingDate,
     isFullyVested,
-    hasAppreciation,
+    appreciationPct,
   } = summary
+
+  const appreciationLine = appreciationPct !== undefined && (
+    <p className="mt-1 text-muted-foreground">
+      {appreciationPct >= 0 ? "↑" : "↓"}{" "}
+      {Math.abs(appreciationPct).toFixed(1)}% since grant — current net value of{" "}
+      <span className="font-medium text-foreground">
+        {formatCurrency(vestedAppreciatedNetValue)}
+      </span>
+      {" "}and total value of{" "}
+      <span className="font-medium text-foreground">
+        {formatCurrency(vestedAppreciatedValue)}
+      </span>
+    </p>
+  )
 
   return (
     <Card>
@@ -112,21 +122,7 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
               total value of{" "}
               <span className={green}>{formatCurrency(totalValue)}</span>.
             </p>
-            {hasAppreciation && (
-              <p className="mt-1">
-                At the current company valuation, your shares are worth{" "}
-                <span className={green}>{formatCurrency(totalAppreciatedValue)}</span>{" "}
-                (net{" "}
-                <span className={green}>{formatCurrency(totalAppreciatedNetValue)}</span>),
-                an appreciation of{" "}
-                <span className={amber}>
-                  {totalValue > 0
-                    ? `${(((totalAppreciatedValue - totalValue) / totalValue) * 100).toFixed(1)}%`
-                    : "—"}
-                </span>{" "}
-                from grant value.
-              </p>
-            )}
+            {appreciationLine}
           </>
         ) : (
           <>
@@ -148,21 +144,7 @@ export function VestingSummary({ grants, valuations }: VestingSummaryProps) {
               total value of{" "}
               <span className={green}>{formatCurrency(totalValue)}</span>.
             </p>
-            {hasAppreciation && (
-              <p className="mt-1">
-                At the current company valuation, your vested shares are worth{" "}
-                <span className={green}>{formatCurrency(vestedAppreciatedValue)}</span>{" "}
-                (net{" "}
-                <span className={green}>{formatCurrency(vestedAppreciatedNetValue)}</span>),
-                an appreciation of{" "}
-                <span className={amber}>
-                  {vestedValue > 0
-                    ? `${(((vestedAppreciatedValue - vestedValue) / vestedValue) * 100).toFixed(1)}%`
-                    : "—"}
-                </span>{" "}
-                from grant value.
-              </p>
-            )}
+            {appreciationLine}
           </>
         )}
       </CardContent>
