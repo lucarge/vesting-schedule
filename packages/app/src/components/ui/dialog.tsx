@@ -6,6 +6,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
+import { DialogPortalContainerContext } from "@/components/ui/dialog-portal-context"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -47,6 +48,7 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
 }) {
+  const [portalContainer, setPortalContainer] = React.useState<HTMLDivElement | null>(null)
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -58,7 +60,9 @@ function DialogContent({
         )}
         {...props}
       >
-        {children}
+        <DialogPortalContainerContext.Provider value={portalContainer}>
+          {children}
+        </DialogPortalContainerContext.Provider>
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="dialog-close"
@@ -75,6 +79,7 @@ function DialogContent({
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
         )}
+        <div ref={setPortalContainer} className="absolute" />
       </DialogPrimitive.Popup>
     </DialogPortal>
   )

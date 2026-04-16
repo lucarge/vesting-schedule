@@ -1,6 +1,7 @@
 import { Popover as PopoverPrimitive } from "@base-ui/react/popover"
 
 import { cn } from "@/lib/utils"
+import { useDialogPortalContainer } from "@/components/ui/dialog-portal-context"
 
 const Popover = PopoverPrimitive.Root
 const PopoverTrigger = PopoverPrimitive.Trigger
@@ -14,8 +15,9 @@ function PopoverContent({
   sideOffset?: number
   container?: PopoverPrimitive.Portal.Props["container"]
 }) {
+  const dialogContainer = useDialogPortalContainer()
   return (
-    <PopoverPrimitive.Portal container={container}>
+    <PopoverPrimitive.Portal container={container ?? dialogContainer ?? undefined}>
       <PopoverPrimitive.Positioner sideOffset={sideOffset}>
         <PopoverPrimitive.Popup
           className={cn(

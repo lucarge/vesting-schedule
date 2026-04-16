@@ -1,4 +1,4 @@
-import { useRef, useState } from "react"
+import { useState } from "react"
 import { CalendarIcon } from "lucide-react"
 import { format } from "date-fns"
 
@@ -106,11 +106,11 @@ export function ValuationForm({ onAdd, initialEntry, onUpdate, className }: Valu
     }
   }
 
-  const formRef = useRef<HTMLFormElement>(null)
+
 
   return (
     <TooltipProvider>
-      <form ref={formRef} onSubmit={handleSubmit} className={cn("grid gap-4", isEditing ? "grid-cols-1" : "grid-cols-[1fr_1fr_1fr_auto] items-end", className)}>
+      <form onSubmit={handleSubmit} className={cn("grid gap-4", isEditing ? "grid-cols-1" : "grid-cols-[1fr_1fr_1fr_auto] items-end", className)}>
         <Field label="Date" tooltip="The effective date of this valuation" error={errors.date}>
           <Popover open={datePickerOpen} onOpenChange={setDatePickerOpen}>
             <PopoverTrigger
@@ -129,7 +129,7 @@ export function ValuationForm({ onAdd, initialEntry, onUpdate, className }: Valu
               <CalendarIcon className="mr-1.5 size-4" />
               {form.date ? format(form.date, "MMM d, yyyy") : "Pick a date"}
             </PopoverTrigger>
-            <PopoverContent className="w-auto p-3" container={isEditing ? formRef.current : undefined}>
+            <PopoverContent className="w-auto p-3">
               <Calendar
                 mode="single"
                 captionLayout="dropdown"
